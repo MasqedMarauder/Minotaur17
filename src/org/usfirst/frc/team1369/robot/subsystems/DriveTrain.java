@@ -9,7 +9,7 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
-public class DriveTrain extends Subsystem{
+public class DriveTrain extends Subsystem implements Constants {
 
 	private Joystick gamepad = RobotMap.gamepad;
 	
@@ -19,26 +19,25 @@ public class DriveTrain extends Subsystem{
 	//a = master
 	//b = middle
 	//c = other
-	public void setupTalon(CANTalon a, CANTalon b, CANTalon c) {
+	public void setupTalon(CANTalon a, CANTalon b, CANTalon c, boolean reversed) {
+		a.reverseOutput(reversed);
 		b.setControlMode(CANTalon.TalonControlMode.Follower.value);
 		b.set(a.getDeviceID());
-		b.reverseOutput(true);
+		b.reverseOutput(!reversed);
 		
 		c.setControlMode(CANTalon.TalonControlMode.Follower.value);
 		c.set(a.getDeviceID());
-		
-		a.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 	}
 	
-	public void configTalon(CANTalon a) {
+	public void configTalon(CANTalon a, boolean reversed) {
 		a.setEncPosition(0);
 		a.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-		a.reverseSensor(false);
+		a.reverseSensor(reversed);
 		
-		a.configNominalOutputVoltage(+0.0f,-0.0f);
-		a.configPeakOutputVoltage(+12f, -12f);
+		a.configNominalOutputVoltage(+NOMINAL_OUTPUT_VOLTAGE,-NOMINAL_OUTPUT_VOLTAGE);
+		a.configPeakOutputVoltage(+PEAK_OUTPUT_VOLTAGE, -PEAK_OUTPUT_VOLTAGE);
 		
-		a.configEncoderCodesPerRev(256);
+		a.configEncoderCodesPerRev(PPR);
 		
 		a.setAllowableClosedLoopErr(0);
 		a.setProfile(0);
@@ -50,11 +49,11 @@ public class DriveTrain extends Subsystem{
 	
 	public DriveTrain() {
 		//setup the slaves 
-		setupTalon(leftTalon, RobotMap.slaveLeftMiddle, RobotMap.slaveLeft);
-		setupTalon(rightTalon, RobotMap.slaveRightMiddle, RobotMap.slaveRight);
+		setupTalon(leftTalon, RobotMap.slaveLeftMiddle, RobotMap.slaveLeft, true); // left side reversed
+		setupTalon(rightTalon, RobotMap.slaveRightMiddle, RobotMap.slaveRight, false); // right side not reversed
 		
-		configTalon(leftTalon);
-		configTalon(rightTalon);
+		configTalon(leftTalon, true); // left side reversed
+		configTalon(rightTalon, false); // right side reversed
 	
 	}
 	
@@ -83,6 +82,10 @@ public class DriveTrain extends Subsystem{
 			 * the robot should not be able to turn
 			 */
 			//for safety, there will be no code for now, Varun.
+			//for safety, there will be code to stop the robot, Cheenar.
+
+			this.stickCode(leftTalon, 0, 0);
+			this.stickCode(rightTalon, 0, 0);
 		}
 	}
 	
@@ -127,27 +130,27 @@ public class DriveTrain extends Subsystem{
 	
 	public void drivePosition(double target) {
 		setControlMode(TalonControlMode.Position);
-		leftTalon.set(-target);
+		leftTalon.set(target);
 		rightTalon.set(target);
 	}
 	
 	public void driveVbus(double targetRPM) {
 		setControlMode(TalonControlMode.PercentVbus);
-		leftTalon.set(-targetRPM);
+		leftTalon.set(targetRPM);
 		rightTalon.set(targetRPM);
 	}
 	
 	public void driveVelocity(double targetRPM){
 		setControlMode(TalonControlMode.Speed);
-		leftTalon.set(-targetRPM);
+		leftTalon.set(targetRPM);
 		rightTalon.set(targetRPM);
 	}
 	
 	public void driveDistance(double distanceInches){
 		setControlMode(TalonControlMode.Position);
 		resetEncoders();
-		double rotations = distanceInches/(Math.PI*Constants.WHEEL_DIA);
-		leftTalon.set(-rotations);
+		double rotations = distanceInches/(Math.PI*WHEEL_DIA);
+		leftTalon.set(rotations);
 		rightTalon.set(rotations);
 
 	}

@@ -14,7 +14,7 @@ public class SpeedShift {
 	
 	private DoubleSolenoid shift = RobotMap.solSpeedShift;
 	
-	private boolean wasToggled = false;
+	private long prevToggleTime;
 	
 	public SpeedShift() {
 		reset();
@@ -23,19 +23,19 @@ public class SpeedShift {
 	public void reset() {
 		shift.set(speedMode);
 		smartdashboard();
-		wasToggled = false;
+		prevToggleTime = 0;
 	}
 	
 	public void smartdashboard() {
-		SmartDashboard.putString("Speed Shift", shift.get() == speedMode ? "Speed Mode" : "Torque Mode");
+		SmartDashboard.putString("Speed Shift", isSpeedMode() ? "Speed Mode" : "Torque Mode");
 	}
 	
-	public boolean isSpeedMode() {
-		return shift.get() == speedMode;
-	}
+	public boolean isSpeedMode() {return shift.get() == speedMode;}
+
+	public boolean isTorqueMode() {return shift.get() == torqueMode;}
 	
 	public void toggle() {
-		if (!wasToggled) {
+		/*if (!wasToggled) {
 			new Thread(new Runnable() {
 
 				@Override
@@ -50,6 +50,12 @@ public class SpeedShift {
 				}
 				
 			}).start();
+		}*/
+
+		if((System.nanoTime() - prevToggleTime) > 1.5E9) {
+			prevToggleTime = System.nanoTime();
+			shift.set(isSpeedMode() ? torqueMode : speedMode);
+			smartdashboard();
 		}
 	}
 	

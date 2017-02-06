@@ -7,8 +7,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class GearGrabber extends Subsystem
-{
+public class GearGrabber extends Subsystem {
 	
 	private DoubleSolenoid gearGrabber = RobotMap.solGearGrabber;
 	public static Value open = Value.kReverse;
@@ -24,12 +23,12 @@ public class GearGrabber extends Subsystem
 	}
 	
 	public void smartdashboard() {
-		SmartDashboard.putString("Gear Grabber", gearGrabber.get() == open ? "Open" : "Closed");
+		SmartDashboard.putString("Gear Grabber", isOpen() ? "Open" : "Closed");
 	}
 
-	public boolean isClosed() {
-		return gearGrabber.get() == closed;
-	}
+	public boolean isOpen() {return gearGrabber.get() == open;}
+
+	public boolean isClosed() {return gearGrabber.get() == closed;}
 	
 	public void teleop() {
 		if(RobotMap.gamepad.getRawButton(RobotMap.JOY_GRGRB_OPEN)) {

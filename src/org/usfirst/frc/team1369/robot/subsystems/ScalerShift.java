@@ -13,7 +13,7 @@ public class ScalerShift {
 	public static Value climber = Value.kForward;
 	public static Value drive = Value.kReverse;
 	
-	public boolean wasToggled;
+	private long prevToggleTime;
 	
 	public ScalerShift() {
 		reset();
@@ -22,19 +22,19 @@ public class ScalerShift {
 	public void reset() {
 		shift.set(drive);
 		smartdashboard();
-		wasToggled = false;
+		prevToggleTime = 0;
 	}
 	
 	public void smartdashboard() {
-		SmartDashboard.putString("Scaler Shift", shift.get() == drive ? "Drive Mode" : "Scaler Mode");
+		SmartDashboard.putString("Scaler Shift", isDriveMode() ? "Drive Mode" : "Scaler Mode");
 	}
+
+	public boolean isDriveMode() {return shift.get() == drive;}
 	
-	public boolean isScalerMode() {
-		return shift.get() == climber;
-	}
+	public boolean isScalerMode() {return shift.get() == climber;}
 	
 	public void toggle() {
-		if (!wasToggled) {
+		/*if (!wasToggled) {
 			new Thread(new Runnable() {
 
 				@Override
@@ -49,6 +49,13 @@ public class ScalerShift {
 				}
 				
 			}).start();
+		}*/
+
+		// check if the current time is 1.5 seconds more than the previous toggle time
+		if((System.nanoTime() - prevToggleTime) > 1.5E9) {
+			prevToggleTime = System.nanoTime();
+			shift.set(isScalerMode() ? drive : climber);
+			smartdashboard();
 		}
 	}
 	

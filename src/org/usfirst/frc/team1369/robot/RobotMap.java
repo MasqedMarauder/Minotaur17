@@ -11,8 +11,7 @@ import edu.wpi.first.wpilibj.Joystick;
  * the wiring easier and significantly reduces the number of magic numbers
  * floating around.
  */
-public class RobotMap 
-{
+public class RobotMap {
 	
 	public static Joystick gamepad = new Joystick(0);
 	
