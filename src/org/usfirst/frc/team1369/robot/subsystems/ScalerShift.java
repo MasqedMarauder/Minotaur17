@@ -1,8 +1,6 @@
 package org.usfirst.frc.team1369.robot.subsystems;
 
 import org.usfirst.frc.team1369.robot.RobotMap;
-import org.usfirst.frc.team1369.robot.commands.AutoUtils;
-
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -34,29 +32,16 @@ public class ScalerShift {
 	public boolean isScalerMode() {return shift.get() == climber;}
 	
 	public void toggle() {
-		/*if (!wasToggled) {
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					wasToggled = true;
-					
-					shift.set(isScalerMode() ? drive : climber);
-					smartdashboard();
-					
-					AutoUtils.sleeper(1500);
-					wasToggled = false;
-				}
-				
-			}).start();
-		}*/
-
 		// check if the current time is 1.5 seconds more than the previous toggle time
-		if((System.nanoTime() - prevToggleTime) > 1.5E9) {
+		if((System.nanoTime() - prevToggleTime) > nanoTimeConvert(1.5)) {
 			prevToggleTime = System.nanoTime();
 			shift.set(isScalerMode() ? drive : climber);
 			smartdashboard();
 		}
+	}
+	
+	public double nanoTimeConvert(double sec) {
+		return sec * (10^9);
 	}
 	
 	public void teleop() {

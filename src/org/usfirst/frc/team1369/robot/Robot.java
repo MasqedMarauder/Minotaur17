@@ -2,6 +2,7 @@
 package org.usfirst.frc.team1369.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -131,7 +132,15 @@ public class Robot extends IterativeRobot {
 		gearGrabber.teleop();
 		scalerShift.teleop();
 		speedShift.teleop();
+		
+		if(RobotMap.gamepad.getRawButton(6)) {
+			apoorva.set(-1);
+		} else {
+			apoorva.set(0);
+		}
 	}
+	
+	public static VictorSP apoorva = new VictorSP(2);
 
 	/**
 	 * This function is called periodically during test mode

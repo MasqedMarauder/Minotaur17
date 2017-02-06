@@ -77,15 +77,9 @@ public class DriveTrain extends Subsystem implements Constants {
 		}
 		else 
 		{
-			/*
-			 * the scaler is engaged
-			 * the robot should not be able to turn
-			 */
-			//for safety, there will be no code for now, Varun.
-			//for safety, there will be code to stop the robot, Cheenar.
-
-			this.stickCode(leftTalon, 0, 0);
-			this.stickCode(rightTalon, 0, 0);
+			this.setControlMode(TalonControlMode.PercentVbus);
+			this.leftTalon.set(0);
+			this.rightTalon.set(0);
 		}
 	}
 	
