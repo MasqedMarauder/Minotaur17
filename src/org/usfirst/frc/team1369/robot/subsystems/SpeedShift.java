@@ -37,6 +37,7 @@ public class SpeedShift {
 	public boolean isTorqueMode() {return shift.get() == torqueMode;}
 	
 	public void toggle() {
+		/*
 		if (!wasToggled) {
 			new Thread(new Runnable() {
 
@@ -52,6 +53,13 @@ public class SpeedShift {
 				}
 				
 			}).start();
+		}
+		*/
+		
+		if((System.nanoTime() - prevToggleTime) > nanoTimeConvert(1.5)) {
+			prevToggleTime = System.nanoTime();
+			shift.set(isSpeedMode() ? torqueMode : speedMode);
+			smartdashboard();
 		}
 
 	}
