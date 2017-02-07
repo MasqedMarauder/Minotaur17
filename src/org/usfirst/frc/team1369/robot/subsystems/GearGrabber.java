@@ -34,7 +34,7 @@ public class GearGrabber extends Subsystem {
 		if(RobotMap.gamepad.getRawButton(RobotMap.JOY_GRGRB_OPEN)) {
 			gearGrabber.set(open);
 		}
-		if(RobotMap.gamepad.getRawButton(RobotMap.JOY_GRGRB_CLOSED)) {
+		else{
 			gearGrabber.set(closed);
 		}
 		smartdashboard();

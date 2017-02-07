@@ -16,6 +16,8 @@ public class DriveTrain extends Subsystem implements Constants {
 	private CANTalon leftTalon = RobotMap.masterLeft;
 	private CANTalon rightTalon = RobotMap.masterRight;
 	
+	private int mode = 0;
+	
 	//a = master
 	//b = middle
 	//c = other
@@ -71,15 +73,41 @@ public class DriveTrain extends Subsystem implements Constants {
 			//leftTalon.set(!deadband(l_stick) ? l_stick : 0);
 			//rightTalon.set(!deadband(r_stick) ? r_stick : 0);
 			
+			if(mode == 0){
+				leftTalon.set(-1 * l_stick);
+				rightTalon.set(r_stick);
+			}
 			
-			this.stickCode(leftTalon, l_stick, l_stick);
-			this.stickCode(rightTalon, r_stick, -r_stick);
+			else if(mode == 1){
+				double forward = gamepad.getY();
+				double turn = -1 * gamepad.getZ();
+				
+				double left = forward + turn;
+				double right = forward - turn;
+				if(left > 1){
+					left /= left;
+					right /= left;
+				}
+				else if(right > 1){
+					left /= right;
+					right /= right;
+				}
+				leftTalon.set(-1 * left);
+				rightTalon.set(right);
+			}
+			
+			if(gamepad.getPOV()== 0){
+				mode = 0;
+			}
+			else if(gamepad.getPOV() == 180){
+				mode = 1;
+			}
 		}
 		else 
 		{
 			this.setControlMode(TalonControlMode.PercentVbus);
-			this.leftTalon.set(0);
-			this.rightTalon.set(0);
+			leftTalon.set(-1 * l_stick);
+			rightTalon.set(l_stick);
 		}
 	}
 	
@@ -92,11 +120,13 @@ public class DriveTrain extends Subsystem implements Constants {
 	 */
 	public void stickCode(CANTalon t, double j, double s) {
 		if(!deadband(j)) {
-			//figure out the encoder shit later
+			//figure out the encoder sh*t later
 			//resetEncoders();
 			
 			setControlMode(TalonControlMode.PercentVbus);
 			t.set(s);  //we are using speed but might switch to percent vbus
+			
+			
 		}
 		else {
 			setControlMode(TalonControlMode.PercentVbus);

@@ -12,6 +12,8 @@ public class SpeedShift {
 	public static Value speedMode = Value.kReverse;
 	public static Value torqueMode = Value.kForward;
 	
+	private static boolean wasToggled = false;
+	
 	private DoubleSolenoid shift = RobotMap.solSpeedShift;
 	
 	private long prevToggleTime;
@@ -35,7 +37,7 @@ public class SpeedShift {
 	public boolean isTorqueMode() {return shift.get() == torqueMode;}
 	
 	public void toggle() {
-		/*if (!wasToggled) {
+		if (!wasToggled) {
 			new Thread(new Runnable() {
 
 				@Override
@@ -50,13 +52,8 @@ public class SpeedShift {
 				}
 				
 			}).start();
-		}*/
-
-		if((System.nanoTime() - prevToggleTime) > 1.5E9) {
-			prevToggleTime = System.nanoTime();
-			shift.set(isSpeedMode() ? torqueMode : speedMode);
-			smartdashboard();
 		}
+
 	}
 	
 	public void teleop() {
