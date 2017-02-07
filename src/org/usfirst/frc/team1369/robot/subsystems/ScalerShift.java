@@ -36,6 +36,7 @@ public class ScalerShift {
 	
 	public void toggle() {
 		// check if the current time is 1.5 seconds more than the previous toggle time
+		/*
 		if (!wasToggled) {
 			new Thread(new Runnable() {
 
@@ -52,18 +53,18 @@ public class ScalerShift {
 				
 			}).start();
 		}
+		*/
 		
-		/*
-		if((System.nanoTime() - prevToggleTime) > nanoTimeConvert(4)) {
+		
+		if((System.nanoTime() - prevToggleTime) > nanoTimeConvert(1.5)) {
 			prevToggleTime = System.nanoTime();
 			shift.set(isScalerMode() ? drive : climber);
 			smartdashboard();
 		}
-		*/
 	}
 	
 	public double nanoTimeConvert(double sec) {
-		return sec * (10^9);
+		return sec * (10E9);
 	}
 	
 	public void teleop() {
