@@ -70,4 +70,8 @@ public class SpeedShift {
 		}
 	}
 	
+	public double nanoTimeConvert(double sec) {
+		return sec * (10E9);
+	}
+	
 }
