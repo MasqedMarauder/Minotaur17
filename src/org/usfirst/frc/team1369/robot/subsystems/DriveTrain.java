@@ -3,75 +3,94 @@ package org.usfirst.frc.team1369.robot.subsystems;
 import org.usfirst.frc.team1369.robot.Constants;
 import org.usfirst.frc.team1369.robot.Robot;
 import org.usfirst.frc.team1369.robot.RobotMap;
+import org.usfirst.frc.team1369.robot.commands.AutoUtils;
+
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
+
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class DriveTrain extends Subsystem implements Constants {
-
-	private Joystick gamepad = RobotMap.gamepad;
+public class DriveTrain extends Subsystem implements Constants{
+	
 	
 	private CANTalon leftTalon = RobotMap.masterLeft;
 	private CANTalon rightTalon = RobotMap.masterRight;
+	
+	public static ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 	
 	private int mode = 0;
 	
 	//a = master
 	//b = middle
 	//c = other
-	public void setupTalon(CANTalon a, CANTalon b, CANTalon c, boolean reversed) {
-		a.reverseOutput(reversed);
+	public void setupTalon(CANTalon a, CANTalon b, CANTalon c) {
 		b.setControlMode(CANTalon.TalonControlMode.Follower.value);
 		b.set(a.getDeviceID());
-		b.reverseOutput(!reversed);
+		b.reverseOutput(true);
 		
 		c.setControlMode(CANTalon.TalonControlMode.Follower.value);
 		c.set(a.getDeviceID());
+		
+		a.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 	}
 	
-	public void configTalon(CANTalon a, boolean reversed) {
+	public void configTalon(CANTalon a) {
 		a.setEncPosition(0);
 		a.setFeedbackDevice(FeedbackDevice.QuadEncoder);
-		a.reverseSensor(reversed);
+		a.reverseSensor(false);
 		
-		a.configNominalOutputVoltage(+NOMINAL_OUTPUT_VOLTAGE,-NOMINAL_OUTPUT_VOLTAGE);
-		a.configPeakOutputVoltage(+PEAK_OUTPUT_VOLTAGE, -PEAK_OUTPUT_VOLTAGE);
+		a.configNominalOutputVoltage(+0.0f,-0.0f);
+		a.configPeakOutputVoltage(+12f, -12f);
 		
-		a.configEncoderCodesPerRev(PPR);
+		a.configEncoderCodesPerRev(256);
 		
 		a.setAllowableClosedLoopErr(0);
 		a.setProfile(0);
-		a.setF(0.0);
-		a.setP(0.1);
-		a.setI(0);
-		a.setD(0);
+		a.setF(158.785182119205298013245);
+		a.setP(driveP);
+		a.setI(driveI);
+		a.setD(driveD);
 	}
+	
+	public static double driveP = 0;
+	public static double driveI = 0;
+	public static double driveD = 0;
 	
 	public DriveTrain() {
+		gyro.calibrate();
 		//setup the slaves 
-		setupTalon(leftTalon, RobotMap.slaveLeftMiddle, RobotMap.slaveLeft, true); // left side reversed
-		setupTalon(rightTalon, RobotMap.slaveRightMiddle, RobotMap.slaveRight, false); // right side not reversed
+		setupTalon(leftTalon, RobotMap.slaveLeftMiddle, RobotMap.slaveLeft); // left side reversed
+		setupTalon(rightTalon, RobotMap.slaveRightMiddle, RobotMap.slaveRight); // right side not reversed
 		
-		configTalon(leftTalon, true); // left side reversed
-		configTalon(rightTalon, false); // right side reversed
-	
+		configTalon(leftTalon); // left side reversed
+		configTalon(rightTalon); // right side reversed
+rightTalon.reverseSensor(true);
 	}
+	
+	
 	
 	public void teleop() {
 		/*
 		 * joystick should control the masters
 		 * will set the velocity 
 		 */
+	
+		System.out.println(leftTalon.getEncVelocity());
+		System.out.println(rightTalon.getEncVelocity());
 		
-		double l_stick = gamepad.getY();
-		double r_stick = gamepad.getThrottle();
+		
+		double l_stick = RobotMap.gamepad.getY();
+		double r_stick = RobotMap.gamepad.getThrottle();
 
 		if(!Robot.scalerShift.isScalerMode())
 		{ 
-			//leftTalon.set(!deadband(l_stick) ? l_stick : 0);
-			//rightTalon.set(!deadband(r_stick) ? r_stick : 0);
+			
+			 this.setControlMode(TalonControlMode.PercentVbus);
 			
 			if(mode == 0){
 				leftTalon.set(-1 * l_stick);
@@ -79,8 +98,8 @@ public class DriveTrain extends Subsystem implements Constants {
 			}
 			
 			else if(mode == 1){
-				double forward = gamepad.getY();
-				double turn = -1 * gamepad.getZ();
+				double forward = RobotMap.gamepad.getY();
+				double turn = -1 * RobotMap.gamepad.getZ();
 				
 				double left = forward + turn;
 				double right = forward - turn;
@@ -96,18 +115,26 @@ public class DriveTrain extends Subsystem implements Constants {
 				rightTalon.set(right);
 			}
 			
-			if(gamepad.getPOV()== 0){
+			if(RobotMap.gamepad.getPOV()== 0){
 				mode = 0;
 			}
-			else if(gamepad.getPOV() == 180){
+			else if(RobotMap.gamepad.getPOV() == 180){
 				mode = 1;
+				
 			}
+			
+			 
+			//this.setControlMode(TalonControlMode.PercentVbus);
+			//leftTalon.set(-1 * l_stick);
+			//rightTalon.set(r_stick);
 		}
-		else 
-		{
+		else {
+			
+			
 			this.setControlMode(TalonControlMode.PercentVbus);
 			leftTalon.set(-1 * l_stick);
 			rightTalon.set(l_stick);
+			 
 		}
 	}
 	
@@ -135,7 +162,11 @@ public class DriveTrain extends Subsystem implements Constants {
 	}
 	
 	public boolean deadband(double input) {
-		return Math.abs(input) < 15;
+		return Math.abs(input) < .15;
+	}
+	
+	public void breakThisRobot(){
+		driveVbus(0);
 	}
 	
 	public void setControlMode(TalonControlMode mode) {
@@ -164,26 +195,39 @@ public class DriveTrain extends Subsystem implements Constants {
 		rightTalon.set(targetRPM);
 	}
 	
-	public void driveVelocity(double targetRPM){
+	public void driveVelocity(double targetRPM, double targetRPMIITheRebirth){
 		setControlMode(TalonControlMode.Speed);
-		leftTalon.set(targetRPM);
-		rightTalon.set(targetRPM);
+		leftTalon.set(-targetRPM);
+		rightTalon.set(targetRPMIITheRebirth);
 	}
 	
 	public void driveDistance(double distanceInches){
 		setControlMode(TalonControlMode.Position);
 		resetEncoders();
-		double rotations = distanceInches/(Math.PI*WHEEL_DIA);
+		double rotations = distanceInches/(Math.PI * WHEEL_DIA);
 		leftTalon.set(rotations);
 		rightTalon.set(rotations);
-
+	}
+	
+	public void turn(int degrees) {
+		setControlMode(TalonControlMode.PercentVbus);
+		resetEncoders();
+		gyro.reset();
+		AutoUtils.sleeper(500);
+		double error;
+		double kp = 0.01;
+		do {
+			error = gyro.getAngle() - degrees;
+			leftTalon.set(kp * error);
+			rightTalon.set(-kp * error);
+		} while (Math.abs(error) > 1);
 	}
 	
 	
 
 	@Override
 	protected void initDefaultCommand() {
-		
+		System.out.println("kill me please");
 	}
 	
 }

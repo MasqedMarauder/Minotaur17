@@ -1,6 +1,8 @@
 
 package org.usfirst.frc.team1369.robot;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Command;
@@ -27,7 +29,7 @@ public class Robot extends IterativeRobot {
 	public static GearGrabber gearGrabber;
 	public static ScalerShift scalerShift;
 	public static SpeedShift speedShift;
-	
+	//public static Collecter collecter;
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
 
@@ -41,11 +43,16 @@ public class Robot extends IterativeRobot {
 		gearGrabber = new GearGrabber();
 		scalerShift = new ScalerShift();
 		speedShift = new SpeedShift();
+		//collecter = new Collecter();
 		
 		chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		
 		SmartDashboard.putData("Auto mode", chooser);
+		
+		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+		camera.setResolution(600,600);
+		
 	}
 
 	/**
@@ -127,11 +134,27 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
+		if(!driveTrain.deadband(RobotMap.gamepad.getY()) ){
+			driveTrain.driveVelocity(500*RobotMap.gamepad.getY(), 500*RobotMap.gamepad.getThrottle());
+		}
+		else
+		{
+			driveTrain.breakThisRobot();
+		}
+
+		SmartDashboard.putNumber("LE", RobotMap.masterLeft.getError());
+		SmartDashboard.putNumber("RE", RobotMap.masterRight.getError());
+		SmartDashboard.putNumber("P", DriveTrain.driveP);
+		SmartDashboard.putNumber("I", DriveTrain.driveI);
+		SmartDashboard.putNumber("D", DriveTrain.driveD);
+		SmartDashboard.putNumber("GyroValue", DriveTrain.gyro.getAngle());
+	
 		
-		driveTrain.teleop();
+		
 		gearGrabber.teleop();
 		scalerShift.teleop();
 		speedShift.teleop();
+		//collecter.teleop();
 		
 		if(RobotMap.gamepad.getRawButton(6)) {
 			apoorva.set(-1);

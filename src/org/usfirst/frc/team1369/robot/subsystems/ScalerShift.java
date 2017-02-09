@@ -12,7 +12,7 @@ public class ScalerShift {
 	private DoubleSolenoid shift = RobotMap.solScalerShift;
 	public static Value climber = Value.kForward;
 	public static Value drive = Value.kReverse;
-	private static boolean wasToggled = false;
+	//private static boolean wasToggled = false;
 	
 	private long prevToggleTime;
 	
@@ -36,26 +36,6 @@ public class ScalerShift {
 	
 	public void toggle() {
 		// check if the current time is 1.5 seconds more than the previous toggle time
-		/*
-		if (!wasToggled) {
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					wasToggled = true;
-					
-					shift.set(isDriveMode() ? climber : drive);
-					smartdashboard();
-					
-					AutoUtils.sleeper(1500);
-					wasToggled = false;
-				}
-				
-			}).start();
-		}
-		*/
-		
-		
 		if((System.nanoTime() - prevToggleTime) > nanoTimeConvert(1.5)) {
 			prevToggleTime = System.nanoTime();
 			shift.set(isScalerMode() ? drive : climber);
@@ -64,7 +44,7 @@ public class ScalerShift {
 	}
 	
 	public double nanoTimeConvert(double sec) {
-		return sec * (10E9);
+		return sec * (1E9);
 	}
 	
 	public void teleop() {

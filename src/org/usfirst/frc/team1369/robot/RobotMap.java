@@ -4,6 +4,7 @@ import com.ctre.CANTalon;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.VictorSP;
 
 /**
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
@@ -24,15 +25,13 @@ public class RobotMap {
 	public static CANTalon slaveRightMiddle = new CANTalon(5);
 	public static CANTalon slaveRight = new CANTalon(6);
 		
-	//solenoids
-	public static DoubleSolenoid solScalerShift = new DoubleSolenoid(4,5);
+	//public static VictorSP meme = new VictorSP(2);
 	
+	public static DoubleSolenoid solScalerShift = new DoubleSolenoid(4,5);	
 	public static DoubleSolenoid solSpeedShift = new DoubleSolenoid(6,7);
-	
 	public static DoubleSolenoid solGearGrabber = new DoubleSolenoid(2,3);
 	
-	
-	//button mapping
+	public static int JOY_MEME = 7;
 	public static int JOY_ROPESHIFT = 2;
 	public static int JOY_SPDSHIFT = 3;
 	

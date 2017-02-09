@@ -12,7 +12,7 @@ public class SpeedShift {
 	public static Value speedMode = Value.kReverse;
 	public static Value torqueMode = Value.kForward;
 	
-	private static boolean wasToggled = false;
+	//private static boolean wasToggled = false;
 	
 	private DoubleSolenoid shift = RobotMap.solSpeedShift;
 	
@@ -71,7 +71,7 @@ public class SpeedShift {
 	}
 	
 	public double nanoTimeConvert(double sec) {
-		return sec * (10E9);
+		return sec * (1E9);
 	}
 	
 }
