@@ -11,9 +11,12 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import org.usfirst.frc.team1369.robot.commands.AutoUtils;
-import org.usfirst.frc.team1369.robot.commands.ExampleCommand;
-import org.usfirst.frc.team1369.robot.subsystems.DriveTrain;
+import org.usfirst.frc.team1369.robot.commands.ApoorvaAutoUtils;
+import org.usfirst.frc.team1369.robot.commands.ApoorvaExampleCommand;
+import org.usfirst.frc.team1369.robot.subsystems.ApoorvaDriveTrain;
+
+import com.ctre.CANTalon.TalonControlMode;
+
 import org.usfirst.frc.team1369.robot.subsystems.*;
 
 /**
@@ -25,10 +28,11 @@ import org.usfirst.frc.team1369.robot.subsystems.*;
  */
 public class Robot extends IterativeRobot {
 
-	public static DriveTrain driveTrain;
-	public static GearGrabber gearGrabber;
-	public static ScalerShift scalerShift;
-	public static SpeedShift speedShift;
+	public static ApoorvaDriveTrain driveTrain;
+	public static ApoorvaGearGrabber gearGrabber;
+	public static ApoorvaScalerShift scalerShift;
+	public static ApoorvaSpeedShift speedShift;
+	public static ApoorvaIntake intake;
 	//public static Collecter collecter;
 	Command autonomousCommand;
 	SendableChooser<Command> chooser = new SendableChooser<>();
@@ -39,13 +43,14 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		driveTrain = new DriveTrain();
-		gearGrabber = new GearGrabber();
-		scalerShift = new ScalerShift();
-		speedShift = new SpeedShift();
+		driveTrain = new ApoorvaDriveTrain();
+		gearGrabber = new ApoorvaGearGrabber();
+		scalerShift = new ApoorvaScalerShift();
+		speedShift = new ApoorvaSpeedShift();
+		intake = new ApoorvaIntake();
 		//collecter = new Collecter();
 		
-		chooser.addDefault("Default Auto", new ExampleCommand());
+		chooser.addDefault("Default Auto", new ApoorvaExampleCommand());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		
 		SmartDashboard.putData("Auto mode", chooser);
@@ -120,9 +125,13 @@ public class Robot extends IterativeRobot {
 		if (autonomousCommand != null)
 			autonomousCommand.cancel();
 		
-		AutoUtils.executeMethod(new Runnable() {
+		SmartDashboard.putNumber("P kP", ApoorvaDriveTrain.driveP);
+		SmartDashboard.putNumber("I", ApoorvaDriveTrain.driveI);
+		SmartDashboard.putNumber("D", ApoorvaDriveTrain.driveD);
+		
+		ApoorvaAutoUtils.executeMethod(new Runnable() {
 			public void run() {
-				AutoUtils.sleeper(500);
+				ApoorvaAutoUtils.sleeper(500);
 				resetRobot();
 			}
 		});
@@ -131,39 +140,42 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during operator control
 	 */
+	
+	double error = 0;
+	
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
-		if(!driveTrain.deadband(RobotMap.gamepad.getY()) ){
-			driveTrain.driveVelocity(500*RobotMap.gamepad.getY(), 500*RobotMap.gamepad.getThrottle());
+		if(!driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(1)) || !driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(5))){	
+			driveTrain.driveVelocity(500*ApoorvaMap.gamepad.getRawAxis(1), 500*ApoorvaMap.gamepad.getRawAxis(5)*.93);	
 		}
 		else
 		{
 			driveTrain.breakThisRobot();
 		}
 
-		SmartDashboard.putNumber("LE", RobotMap.masterLeft.getError());
-		SmartDashboard.putNumber("RE", RobotMap.masterRight.getError());
-		SmartDashboard.putNumber("P", DriveTrain.driveP);
-		SmartDashboard.putNumber("I", DriveTrain.driveI);
-		SmartDashboard.putNumber("D", DriveTrain.driveD);
-		SmartDashboard.putNumber("GyroValue", DriveTrain.gyro.getAngle());
+		SmartDashboard.putString("spedl",ApoorvaMap.masterLeft.getSpeed()+"");
+		SmartDashboard.putString("sped2",ApoorvaMap.masterRight.getSpeed()+"");
+		
+		
+		SmartDashboard.putNumber("LE", ApoorvaMap.masterLeft.getError());
+		SmartDashboard.putNumber("RE", ApoorvaMap.masterRight.getError());
+		
+		ApoorvaDriveTrain.driveP = SmartDashboard.getNumber("P kP", 0.5);
+		ApoorvaDriveTrain.driveI = SmartDashboard.getNumber("I", 0.5);
+		ApoorvaDriveTrain.driveD = SmartDashboard.getNumber("D", 0.5);
+		
+		SmartDashboard.putNumber("Gyro Apoorva", ApoorvaDriveTrain.gyro.getAngle());
 	
 		
 		
 		gearGrabber.teleop();
 		scalerShift.teleop();
 		speedShift.teleop();
+		intake.teleop();
 		//collecter.teleop();
 		
-		if(RobotMap.gamepad.getRawButton(6)) {
-			apoorva.set(-1);
-		} else {
-			apoorva.set(0);
-		}
 	}
-	
-	public static VictorSP apoorva = new VictorSP(2);
 
 	/**
 	 * This function is called periodically during test mode
