@@ -36,7 +36,7 @@ public class ApoorvaDriveTrain extends Subsystem implements ApoorvaConstants{
 		c.setControlMode(CANTalon.TalonControlMode.Follower.value);
 		c.set(a.getDeviceID());
 		
-		a.setFeedbackDevice(FeedbackDevice.QuadEncoder);
+		//a.setFeedbackDevice(FeedbackDevice.QuadEncoder);
 	}
 	
 	public void configTalon(CANTalon a) {
@@ -54,7 +54,7 @@ public class ApoorvaDriveTrain extends Subsystem implements ApoorvaConstants{
 		a.setAllowableClosedLoopErr(0);
 		a.setProfile(0);
 		
-		 a.setF(10);
+		 a.setF(.18514);
 		a.setP(0);
 		a.setI(0);
 		a.setD(0);
@@ -76,7 +76,7 @@ public class ApoorvaDriveTrain extends Subsystem implements ApoorvaConstants{
 		
 		configTalon(leftTalon); // left side reversed
 		configTalon(rightTalon); // right side reversed
-rightTalon.reverseSensor(true);
+//rightTalon.reverseSensor(true);
 	}
 	
 	
@@ -183,6 +183,11 @@ rightTalon.reverseSensor(true);
 			rightTalon.changeControlMode(mode);
 	}
 	
+	public void reset() {
+		breakThisRobot();
+		resetEncoders();
+	}
+	
 	public void resetEncoders() {
 		leftTalon.set(0);
 		rightTalon.set(0);
@@ -202,20 +207,33 @@ rightTalon.reverseSensor(true);
 		rightTalon.set(targetRPM);
 	}
 	
-	public void driveVelocity(double targetRPM, double targetRPMIITheRebirth){
+	public void driveStraight(double targetRPM){
 		setControlMode(TalonControlMode.Speed);
 		leftTalon.set(-targetRPM);
-		rightTalon.set(targetRPMIITheRebirth);
-		//rightTalon.set(0);
+		rightTalon.set(targetRPM);
 	}
 	
-	public void driveDistance(double distanceInches){
-		setControlMode(TalonControlMode.Position);
+	public void setLeftSpeed(double targetRPM){
+		setControlMode(TalonControlMode.Speed);
+		leftTalon.set(-targetRPM);
+	}
+	public void setRightSpeed(double targetRPM){
+		setControlMode(TalonControlMode.Speed);
+		rightTalon.set(targetRPM);
+	}
+	
+	public void driveDistance(double distanceInches) {
 		resetEncoders();
+		leftTalon.setAllowableClosedLoopErr(500);
+		rightTalon.setAllowableClosedLoopErr(500);
+		ApoorvaAutoUtils.sleeper(500);
+		
+
+		setControlMode(TalonControlMode.Position);
 		
 		double rotations = distanceInches/(Math.PI * WHEEL_DIA);
-		leftTalon.set(-rotations);
-		rightTalon.set(rotations);
+		leftTalon.set(rotations);
+		rightTalon.set(-rotations);
 	}
 	
 	public void turn(int degrees) {

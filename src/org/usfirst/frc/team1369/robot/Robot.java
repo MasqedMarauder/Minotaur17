@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team1369.robot.commands.ApoorvaAutoUtils;
+import org.usfirst.frc.team1369.robot.commands.ApoorvaDriveFowardTest;
 import org.usfirst.frc.team1369.robot.commands.ApoorvaExampleCommand;
 import org.usfirst.frc.team1369.robot.subsystems.ApoorvaDriveTrain;
 
@@ -51,9 +52,10 @@ public class Robot extends IterativeRobot {
 		//collecter = new Collecter();
 		
 		chooser.addDefault("Default Auto", new ApoorvaExampleCommand());
-		// chooser.addObject("My Auto", new MyAutoCommand());
+		chooser.addObject("Apoorva Drive Forward", new ApoorvaDriveFowardTest());
 		
 		SmartDashboard.putData("Auto mode", chooser);
+	
 		
 		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 		camera.setResolution(600,600);
@@ -114,6 +116,9 @@ public class Robot extends IterativeRobot {
 		Robot.gearGrabber.reset();
 		Robot.scalerShift.reset();
 		Robot.speedShift.reset();
+		Robot.intake.reset();
+		
+		driveTrain.reset();
 	}
 
 	@Override
@@ -124,17 +129,16 @@ public class Robot extends IterativeRobot {
 		// this line or comment it out.
 		if (autonomousCommand != null)
 			autonomousCommand.cancel();
+
+		SmartDashboard.putNumber("Left P", 0.5);
+		SmartDashboard.putNumber("Left I", 0.1);
+		SmartDashboard.putNumber("Left D", 0.1);
 		
-		SmartDashboard.putNumber("P kP", ApoorvaDriveTrain.driveP);
-		SmartDashboard.putNumber("I", ApoorvaDriveTrain.driveI);
-		SmartDashboard.putNumber("D", ApoorvaDriveTrain.driveD);
+		SmartDashboard.putNumber("Right P", 0.5);
+		SmartDashboard.putNumber("Right I", 0.1);
+		SmartDashboard.putNumber("Right D", 0.1);
 		
-		ApoorvaAutoUtils.executeMethod(new Runnable() {
-			public void run() {
-				ApoorvaAutoUtils.sleeper(500);
-				resetRobot();
-			}
-		});
+		resetRobot();
 	}
 
 	/**
@@ -146,34 +150,44 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
+
+		SmartDashboard.putNumber("Left Encoder", ApoorvaMap.masterLeft.getEncPosition());
+		
 		if(!driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(1)) || !driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(5))){	
-			driveTrain.driveVelocity(500*ApoorvaMap.gamepad.getRawAxis(1), 500*ApoorvaMap.gamepad.getRawAxis(5)*.93);	
+			//driveTrain.driveVelocity(500*ApoorvaMap.gamepad.getRawAxis(1), 500*ApoorvaMap.gamepad.getRawAxis(5)*.93);
+			if(!driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(1)))
+				driveTrain.setLeftSpeed(500 * ApoorvaMap.gamepad.getRawAxis(1));
+			if(!driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(5)))
+				driveTrain.setRightSpeed(500 * ApoorvaMap.gamepad.getRawAxis(5));
 		}
 		else
 		{
 			driveTrain.breakThisRobot();
 		}
 
-		SmartDashboard.putString("spedl",ApoorvaMap.masterLeft.getSpeed()+"");
-		SmartDashboard.putString("sped2",ApoorvaMap.masterRight.getSpeed()+"");
+		SmartDashboard.putString("Speed 1",ApoorvaMap.masterLeft.getSpeed()+"");
+		SmartDashboard.putString("Speed 2",ApoorvaMap.masterRight.getSpeed()+"");
 		
 		
 		SmartDashboard.putNumber("LE", ApoorvaMap.masterLeft.getError());
 		SmartDashboard.putNumber("RE", ApoorvaMap.masterRight.getError());
-		
-		ApoorvaDriveTrain.driveP = SmartDashboard.getNumber("P kP", 0.5);
-		ApoorvaDriveTrain.driveI = SmartDashboard.getNumber("I", 0.5);
-		ApoorvaDriveTrain.driveD = SmartDashboard.getNumber("D", 0.5);
+
+
+		ApoorvaMap.masterLeft.setP(SmartDashboard.getNumber("Left P", 0.5));
+		ApoorvaMap.masterLeft.setI(SmartDashboard.getNumber("Left I", 0.1));
+		ApoorvaMap.masterLeft.setD(SmartDashboard.getNumber("Left D", 0.1));
+
+		ApoorvaMap.masterRight.setP(SmartDashboard.getNumber("Right P", 0.5));
+		ApoorvaMap.masterRight.setI(SmartDashboard.getNumber("Right I", 0.1));
+		ApoorvaMap.masterRight.setD(SmartDashboard.getNumber("Right D", 0.1));
 		
 		SmartDashboard.putNumber("Gyro Apoorva", ApoorvaDriveTrain.gyro.getAngle());
 	
-		
 		
 		gearGrabber.teleop();
 		scalerShift.teleop();
 		speedShift.teleop();
 		intake.teleop();
-		//collecter.teleop();
 		
 	}
 

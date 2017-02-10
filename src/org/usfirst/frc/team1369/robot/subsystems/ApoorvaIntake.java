@@ -26,5 +26,9 @@ public class ApoorvaIntake extends Subsystem{
 	protected void initDefaultCommand() {
 		
 	}
+
+	public void reset() {
+		ApoorvaMap.victorIntake.set(0);
+	}
 	
 }
