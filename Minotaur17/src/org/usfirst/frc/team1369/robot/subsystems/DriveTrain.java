@@ -105,6 +105,8 @@ public class DriveTrain extends Subsystem implements Constants {
 		try {Thread.sleep(500);} catch (Exception e) {}
 	}
 	
+	public double getGyroAngle() {return gyro.getAngle();}
+	
 	public void driveInMode(TalonControlMode mode, double left, double right) {
 		setControlMode(mode);
 		setTarget(left, right);
