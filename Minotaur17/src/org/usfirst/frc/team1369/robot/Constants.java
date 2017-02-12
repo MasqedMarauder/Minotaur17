@@ -18,6 +18,13 @@ public interface Constants {
 	int slaveRightMidPort	= 5;
 	int slaveRightPort		= 6;
 	
+	int gearGrabberForChan	= 2;
+	int gearGrabberRevChan	= 3;
+	int scalerShiftForChan	= 4;
+	int scalerShiftRevChan	= 5;
+	int speedShiftForChan	= 6;
+	int speedShiftRevChan	= 7;
+	
 	SPI.Port gyroPort = SPI.Port.kOnboardCS0;
 	
 	int gamepadPort = 0;
