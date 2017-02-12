@@ -25,6 +25,8 @@ public interface Constants {
 	int speedShiftForChan	= 6;
 	int speedShiftRevChan	= 7;
 	
+	int intakePort			= 2;
+	
 	SPI.Port gyroPort = SPI.Port.kOnboardCS0;
 	
 	int gamepadPort = 0;
