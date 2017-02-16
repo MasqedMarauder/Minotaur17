@@ -1,23 +1,17 @@
 
 package org.usfirst.frc.team1369.robot;
 
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Joystick.ButtonType;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import org.usfirst.frc.team1369.robot.commands.ApoorvaAutoUtils;
-import org.usfirst.frc.team1369.robot.commands.ApoorvaDriveFowardTest;
-import org.usfirst.frc.team1369.robot.commands.ApoorvaExampleCommand;
-import org.usfirst.frc.team1369.robot.subsystems.ApoorvaDriveTrain;
-
-import com.ctre.CANTalon.TalonControlMode;
-
+import org.usfirst.frc.team1369.robot.commands.Auto;
+import org.usfirst.frc.team1369.robot.commands.AutoGearTest;
 import org.usfirst.frc.team1369.robot.subsystems.*;
 
 /**
@@ -29,14 +23,19 @@ import org.usfirst.frc.team1369.robot.subsystems.*;
  */
 public class Robot extends IterativeRobot {
 
-	public static ApoorvaDriveTrain driveTrain;
-	public static ApoorvaGearGrabber gearGrabber;
-	public static ApoorvaScalerShift scalerShift;
-	public static ApoorvaSpeedShift speedShift;
-	public static ApoorvaIntake intake;
-	//public static Collecter collecter;
+	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
+	public static OI oi;
+	
+	public static Joystick gamepad;
+	
+	public static DriveTrain driveTrain;
+	public static SpeedShift speedShift;
+	public static ScalerShift scalerShift;
+	public static GearGrabber gearGrabber;
+	public static Intake intake;
+
 	Command autonomousCommand;
-	SendableChooser<Command> chooser = new SendableChooser<>();
+	SendableChooser<Auto> chooser = new SendableChooser<>();
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -44,22 +43,20 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void robotInit() {
-		driveTrain = new ApoorvaDriveTrain();
-		gearGrabber = new ApoorvaGearGrabber();
-		scalerShift = new ApoorvaScalerShift();
-		speedShift = new ApoorvaSpeedShift();
-		intake = new ApoorvaIntake();
-		//collecter = new Collecter();
+		gamepad = new Joystick(Constants.gamepadPort);
 		
-		chooser.addDefault("Default Auto", new ApoorvaExampleCommand());
-		chooser.addObject("Apoorva Drive Forward", new ApoorvaDriveFowardTest());
+		driveTrain = new DriveTrain();
+		speedShift = new SpeedShift();
+		scalerShift = new ScalerShift();
+		gearGrabber = new GearGrabber();
+		intake = new Intake();
 		
+		oi = new OI();
+		chooser.addDefault("Nothing", null);
+		chooser.addObject("GearTest", new AutoGearTest());
+		//chooser.addDefault("Default Auto", new ExampleCommand());
+		//chooser.addObject("My Auto", new GearAuto());
 		SmartDashboard.putData("Auto mode", chooser);
-	
-		
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-		camera.setResolution(600,600);
-		
 	}
 
 	/**
@@ -90,20 +87,13 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		autonomousCommand = chooser.getSelected();
-
-		/*
-		 * String autoSelected = SmartDashboard.getString("Auto Selector",
-		 * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
-		 * = new MyAutoCommand(); break; case "Default Auto": default:
-		 * autonomousCommand = new ExampleCommand(); break; }
-		 */
-
-		// schedule the autonomous command (example)
-		if (autonomousCommand != null)
-			autonomousCommand.start();
+		a = (Auto)chooser.getSelected();
+		if(a != null)
+			a.auto();
 	}
 
+	private Auto a;
+	
 	/**
 	 * This function is called periodically during autonomous
 	 */
@@ -111,84 +101,35 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 		Scheduler.getInstance().run();
 	}
-	
-	public static void resetRobot() {
-		Robot.gearGrabber.reset();
-		Robot.scalerShift.reset();
-		Robot.speedShift.reset();
-		Robot.intake.reset();
-		
-		driveTrain.reset();
-	}
 
 	@Override
 	public void teleopInit() {
-		// This makes sure that the autonomous stops running when
-		// teleop starts running. If you want the autonomous to
-		// continue until interrupted by another command, remove
-		// this line or comment it out.
-		if (autonomousCommand != null)
-			autonomousCommand.cancel();
-
-		SmartDashboard.putNumber("Left P", 0.5);
-		SmartDashboard.putNumber("Left I", 0.1);
-		SmartDashboard.putNumber("Left D", 0.1);
+		if(a != null)
+			a.stop();
 		
-		SmartDashboard.putNumber("Right P", 0.5);
-		SmartDashboard.putNumber("Right I", 0.1);
-		SmartDashboard.putNumber("Right D", 0.1);
-		
-		resetRobot();
+		Utils.resetRobot();
+		Utils.resetRobot();
 	}
 
 	/**
 	 * This function is called periodically during operator control
 	 */
-	
-	double error = 0;
-	
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
+		
+		
+		
+		driveTrain.teleop(gamepad);
+		speedShift.teleop(gamepad);
+		scalerShift.teleop(gamepad);
+		gearGrabber.teleop(gamepad);
+		intake.teleop(gamepad);
 
-		SmartDashboard.putNumber("Left Encoder", ApoorvaMap.masterLeft.getEncPosition());
+		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
+		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());
 		
-		if(!driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(1)) || !driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(5))){	
-			//driveTrain.driveVelocity(500*ApoorvaMap.gamepad.getRawAxis(1), 500*ApoorvaMap.gamepad.getRawAxis(5)*.93);
-			if(!driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(1)))
-				driveTrain.setLeftSpeed(500 * ApoorvaMap.gamepad.getRawAxis(1));
-			if(!driveTrain.deadband(ApoorvaMap.gamepad.getRawAxis(5)))
-				driveTrain.setRightSpeed(500 * ApoorvaMap.gamepad.getRawAxis(5));
-		}
-		else
-		{
-			driveTrain.breakThisRobot();
-		}
-
-		SmartDashboard.putString("Speed 1",ApoorvaMap.masterLeft.getSpeed()+"");
-		SmartDashboard.putString("Speed 2",ApoorvaMap.masterRight.getSpeed()+"");
-		
-		
-		SmartDashboard.putNumber("LE", ApoorvaMap.masterLeft.getError());
-		SmartDashboard.putNumber("RE", ApoorvaMap.masterRight.getError());
-
-
-		ApoorvaMap.masterLeft.setP(SmartDashboard.getNumber("Left P", 0.5));
-		ApoorvaMap.masterLeft.setI(SmartDashboard.getNumber("Left I", 0.1));
-		ApoorvaMap.masterLeft.setD(SmartDashboard.getNumber("Left D", 0.1));
-
-		ApoorvaMap.masterRight.setP(SmartDashboard.getNumber("Right P", 0.5));
-		ApoorvaMap.masterRight.setI(SmartDashboard.getNumber("Right I", 0.1));
-		ApoorvaMap.masterRight.setD(SmartDashboard.getNumber("Right D", 0.1));
-		
-		SmartDashboard.putNumber("Gyro Apoorva", ApoorvaDriveTrain.gyro.getAngle());
-	
-		
-		gearGrabber.teleop();
-		scalerShift.teleop();
-		speedShift.teleop();
-		intake.teleop();
-		
+		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
 	}
 
 	/**
