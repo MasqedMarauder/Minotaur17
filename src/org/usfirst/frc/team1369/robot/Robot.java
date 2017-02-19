@@ -1,6 +1,8 @@
 
 package org.usfirst.frc.team1369.robot;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Joystick.ButtonType;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team1369.robot.commands.Auto;
 import org.usfirst.frc.team1369.robot.commands.AutoGearTest;
+import org.usfirst.frc.team1369.robot.commands.AutoTurn;
 import org.usfirst.frc.team1369.robot.subsystems.*;
 
 /**
@@ -25,9 +28,9 @@ public class Robot extends IterativeRobot {
 
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
-	
+
 	public static Joystick gamepad;
-	
+
 	public static DriveTrain driveTrain;
 	public static SpeedShift speedShift;
 	public static ScalerShift scalerShift;
@@ -37,6 +40,8 @@ public class Robot extends IterativeRobot {
 	Command autonomousCommand;
 	SendableChooser<Auto> chooser = new SendableChooser<>();
 
+	public static Camera camera;
+	
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -44,19 +49,23 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		gamepad = new Joystick(Constants.gamepadPort);
-		
+
+		camera = new Camera();
 		driveTrain = new DriveTrain();
 		speedShift = new SpeedShift();
 		scalerShift = new ScalerShift();
 		gearGrabber = new GearGrabber();
 		intake = new Intake();
-		
+
 		oi = new OI();
 		chooser.addDefault("Nothing", null);
 		chooser.addObject("GearTest", new AutoGearTest());
-		//chooser.addDefault("Default Auto", new ExampleCommand());
-		//chooser.addObject("My Auto", new GearAuto());
+		chooser.addObject("Turn test", new AutoTurn());
+		// chooser.addDefault("Default Auto", new ExampleCommand());
+		// chooser.addObject("My Auto", new GearAuto());
 		SmartDashboard.putData("Auto mode", chooser);
+
+		//camera.start();
 	}
 
 	/**
@@ -66,7 +75,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void disabledInit() {
-
+		System.out.println("Vatsan was here");
 	}
 
 	@Override
@@ -87,27 +96,38 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		a = (Auto)chooser.getSelected();
-		if(a != null)
+		a = (Auto) chooser.getSelected();
+		if (a != null)
 			a.auto();
 	}
 
 	private Auto a;
-	
+
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	@Override
 	public void autonomousPeriodic() {
+
 		Scheduler.getInstance().run();
+
+		
+		
+		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
+
+		SmartDashboard.putNumber("Distance:  ", camera.getDistance());
+		SmartDashboard.putNumber("Angle:  ", camera.getAngle());
+
 	}
 
 	@Override
 	public void teleopInit() {
-		if(a != null)
-			a.stop();
 		
-		Utils.resetRobot();
+		if (a != null){
+			a.threadLock = null;
+			a.stop();
+		}
+		
 		Utils.resetRobot();
 	}
 
@@ -117,9 +137,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
-		
-		
-		
+
 		driveTrain.teleop(gamepad);
 		speedShift.teleop(gamepad);
 		scalerShift.teleop(gamepad);
@@ -128,8 +146,17 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());
-		
+
+		SmartDashboard.putNumber("Left motor", driveTrain.getLeftTalon().get());
+		SmartDashboard.putNumber("Right motor", driveTrain.getRightTalon().get());
+
 		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
+
+		SmartDashboard.putNumber("Distance:  ", camera.getDistance());
+		SmartDashboard.putNumber("Angle:  ", camera.getAngle());
+
+		SmartDashboard.putNumber("LCurrent", driveTrain.getLeftTalon().getOutputCurrent());
+		SmartDashboard.putNumber("RCurrent", driveTrain.getRightTalon().getOutputCurrent());
 	}
 
 	/**
@@ -139,4 +166,5 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 		LiveWindow.run();
 	}
+
 }

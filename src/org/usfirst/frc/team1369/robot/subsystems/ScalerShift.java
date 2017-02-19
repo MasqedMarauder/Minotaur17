@@ -1,5 +1,8 @@
 package org.usfirst.frc.team1369.robot.subsystems;
 
+import org.usfirst.frc.team1369.robot.Robot;
+import org.usfirst.frc.team1369.robot.Utils;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,6 +23,7 @@ public class ScalerShift extends MinoDoubleSol {
 	
 	public ScalerShift() {
 		super(scalerShiftForChan, scalerShiftRevChan);
+		
 		set(Mode.DRIVE);
 		smartDashboard();
 	}
@@ -28,6 +32,7 @@ public class ScalerShift extends MinoDoubleSol {
 		super.reset();
 		set(Mode.DRIVE);
 		smartDashboard();
+		shouldExecute = true;
 	}
 	
 	public void set(Mode mode) {set(mode.value);}
@@ -41,7 +46,21 @@ public class ScalerShift extends MinoDoubleSol {
 	}
 
 	public void teleop(Joystick gamepad) {
-		if (gamepad.getRawButton(BTN_B)) {toggle();}
+		if (gamepad.getRawButton(BTN_BACK)) {
+			if(shouldExecute) {
+				shouldExecute = false;
+				new Thread(new Runnable() {
+					public void run() {
+						set(isDriveMode() ? Mode.SCALE : Mode.DRIVE);
+						Robot.speedShift.set(isScaleMode() ? SpeedShift.Mode.TORQUE : SpeedShift.Mode.SPEED);
+						Utils.sleep(1000);
+						shouldExecute = true;
+					}
+				}).start();
+			}
+		}
 	}
+	
+	public boolean shouldExecute = true;
 
 }

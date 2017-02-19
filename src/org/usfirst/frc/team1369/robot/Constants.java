@@ -9,7 +9,8 @@ import edu.wpi.first.wpilibj.SPI;
  * floating around.
  */
 public interface Constants {
-	
+
+	double VISION_TARG_WIDTH = 10;
 	//Hardware Ports	
 	int masterLeftPort		= 1;
 	int slaveLeftMidPort	= 3;

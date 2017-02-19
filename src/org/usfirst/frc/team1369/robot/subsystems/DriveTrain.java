@@ -2,6 +2,7 @@ package org.usfirst.frc.team1369.robot.subsystems;
 
 import org.usfirst.frc.team1369.robot.Constants;
 import org.usfirst.frc.team1369.robot.Robot;
+import org.usfirst.frc.team1369.robot.subsystems.SpeedShift.Mode;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -90,6 +91,8 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		
 		master.setAllowableClosedLoopErr(0);
 		master.setProfile(0);
+		
+		master.setVoltageRampRate(48);
 		
 		master.setF(kfDriveTrainVbus);
 		master.setP(kpDriveTrainVbus);
@@ -183,7 +186,19 @@ public class DriveTrain extends Subsystem implements Constants, Section {
         stopDrive();
     }
 	
-	public void turnP(double degrees, Direction direction, double speed) {
+	public double inchesToApporvas(double inches){
+		return inches / (4* Math.PI);
+	}
+	
+	public void moveInches( double inches){
+		setControlMode(TalonControlMode.Position);
+		leftTalon.setProfile(1);
+		rightTalon.setProfile(1);
+		setTarget(inchesToApporvas(inches));
+		leftTalon.setProfile(0);
+		rightTalon.setProfile(0);
+	}
+	public void turnP(double degrees, Direction direction, double speed, Object threadLock) {
         resetGyro();
 		
 		double error;
@@ -195,9 +210,12 @@ public class DriveTrain extends Subsystem implements Constants, Section {
             power = kp * error;
             power = clip(power, -speed, +speed);
             setTarget(-power, +power);
-        } while (Math.abs(error) > 0.5);
+            System.out.println("turning: " + degrees + ":" + direction.toString() + ":" + speed);
+        } while (Math.abs(error) > 0.5 && (threadLock != null));
         stopDrive();
     }
+	
+	public static boolean robotStop = false;
 	
 	public void turnPID(double degrees, Direction direction, double speed) {
 		resetGyro();
@@ -292,7 +310,21 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 
 		
 		if(!Robot.scalerShift.isScaleMode()) {
-			switch(driveMode) {
+			//this.leftTalon.set(left_y * 500);
+			//this.rightTalon.set(right_y * 500);
+			double leftPower = left_y - right_x;
+			double rightPower = left_y + right_x;
+			
+			if (Math.abs(leftPower) > 1) {
+				leftPower /= Math.abs(leftPower);
+				rightPower /= Math.abs(leftPower);
+			}
+			if (Math.abs(rightPower) > 1) {
+				leftPower /= Math.abs(rightPower);
+				rightPower /= Math.abs(rightPower);
+			}			
+			driveVelocity(1250 * leftPower, 1250 * rightPower);
+			/*switch(driveMode) {
 				case TANK_DRIVE:			
 					//driveVbus(left_y * 0.8, right_y * 0.8);
 					driveVelocity(-1250 * left_y, 1250 * right_y);
@@ -310,9 +342,11 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 						rightPower /= Math.abs(rightPower);
 					}
 					
+					
+					
 					driveVelocity(1250 * leftPower, 1250 * rightPower);
 					break;
-			}
+			}*/
 		} else {
 			driveVbus(left_y, -left_y);
 		}

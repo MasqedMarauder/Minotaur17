@@ -8,6 +8,8 @@ public abstract class Auto {
 
 	public DriveTrain driveTrain;
 	public GearGrabber grabber;
+	public Thread thread;
+	public Object threadLock;
 	
 	public Auto() {
 		this.driveTrain = Robot.driveTrain;
