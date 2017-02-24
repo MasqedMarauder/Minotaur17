@@ -13,9 +13,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team1369.robot.commands.Auto;
-import org.usfirst.frc.team1369.robot.commands.AutoGearTest;
-import org.usfirst.frc.team1369.robot.commands.AutoTurn;
+import org.usfirst.frc.team1369.robot.commands.AutoGearBlueBoiler;
+import org.usfirst.frc.team1369.robot.commands.AutoGearBlueLoader;
+import org.usfirst.frc.team1369.robot.commands.AutoGearCenter;
+import org.usfirst.frc.team1369.robot.commands.AutoPIDTuning;
+import org.usfirst.frc.team1369.robot.commands.AutoTestCamera;
+import org.usfirst.frc.team1369.robot.commands.AutoTestCamera2;
 import org.usfirst.frc.team1369.robot.subsystems.*;
+import org.usfirst.frc.team1369.robot.subsystems.DriveTrain.Direction;
+import org.usfirst.frc.team1369.robot.subsystems.SpeedShift.Mode;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -37,11 +43,14 @@ public class Robot extends IterativeRobot {
 	public static GearGrabber gearGrabber;
 	public static Intake intake;
 
+	public static boolean isTeleop = false;
+	public static boolean isDisabled = false;
+
 	Command autonomousCommand;
 	SendableChooser<Auto> chooser = new SendableChooser<>();
 
 	public static Camera camera;
-	
+
 	/**
 	 * This function is run when the robot is first started up and should be
 	 * used for any initialization code.
@@ -50,6 +59,18 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		gamepad = new Joystick(Constants.gamepadPort);
 
+/*
+		SmartDashboard.putNumber("Left PID Constant P", Constants.kpDriveTrainVbus);
+		SmartDashboard.putNumber("Left PID Constant I", Constants.kiDriveTrainVbus);
+		SmartDashboard.putNumber("Left PID Constant D", Constants.kdDriveTrainVbus);
+		SmartDashboard.putNumber("Left PID Constant F", Constants.kfDriveTrainVbus);
+
+		SmartDashboard.putNumber("Right PID Constant P", Constants.kpDriveTrainVbus);
+		SmartDashboard.putNumber("Right PID Constant I", Constants.kiDriveTrainVbus);
+		SmartDashboard.putNumber("Right PID Constant D", Constants.kdDriveTrainVbus);
+		SmartDashboard.putNumber("right PID Constant F", Constants.kfDriveTrainVbus);
+*/
+		
 		camera = new Camera();
 		driveTrain = new DriveTrain();
 		speedShift = new SpeedShift();
@@ -59,13 +80,21 @@ public class Robot extends IterativeRobot {
 
 		oi = new OI();
 		chooser.addDefault("Nothing", null);
-		chooser.addObject("GearTest", new AutoGearTest());
-		chooser.addObject("Turn test", new AutoTurn());
+		chooser.addObject("GearTest", new AutoGearCenter());
+		chooser.addObject("BlueLoader", new AutoGearBlueLoader());
+		chooser.addObject("BlueBoiler", new AutoGearBlueBoiler());
+		chooser.addObject("CameraTest", new AutoTestCamera());
+		chooser.addObject("CameraDriving", new AutoTestCamera2());
+		chooser.addObject("PID TUning", new AutoPIDTuning());
 		// chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new GearAuto());
-		SmartDashboard.putData("Auto mode", chooser);
+		SmartDashboard.putData("Apoorvas", chooser);
 
-		//camera.start();
+		camera.start();
+
+		Robot.speedShift.set(Mode.TORQUE);
+
+		Utils.resetRobot();
 	}
 
 	/**
@@ -75,7 +104,9 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void disabledInit() {
-		System.out.println("Vatsan was here");
+		isTeleop = false;
+		isDisabled = true;
+
 	}
 
 	@Override
@@ -96,11 +127,11 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		a = (Auto) chooser.getSelected();
-		if (a != null)
-			a.auto();
+		a = chooser.getSelected();
+		a.auto();
 	}
 
+	AutoGearCenter auto = new AutoGearCenter();
 	private Auto a;
 
 	/**
@@ -110,39 +141,6 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 
 		Scheduler.getInstance().run();
-
-		
-		
-		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
-
-		SmartDashboard.putNumber("Distance:  ", camera.getDistance());
-		SmartDashboard.putNumber("Angle:  ", camera.getAngle());
-
-	}
-
-	@Override
-	public void teleopInit() {
-		
-		if (a != null){
-			a.threadLock = null;
-			a.stop();
-		}
-		
-		Utils.resetRobot();
-	}
-
-	/**
-	 * This function is called periodically during operator control
-	 */
-	@Override
-	public void teleopPeriodic() {
-		Scheduler.getInstance().run();
-
-		driveTrain.teleop(gamepad);
-		speedShift.teleop(gamepad);
-		scalerShift.teleop(gamepad);
-		gearGrabber.teleop(gamepad);
-		intake.teleop(gamepad);
 
 		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());
@@ -157,6 +155,57 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("LCurrent", driveTrain.getLeftTalon().getOutputCurrent());
 		SmartDashboard.putNumber("RCurrent", driveTrain.getRightTalon().getOutputCurrent());
+
+		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
+
+		SmartDashboard.putNumber("Distance:  ", camera.getDistance());
+		SmartDashboard.putNumber("Angle:  ", camera.getAngle());
+
+	}
+
+	@Override
+	public void teleopInit() {
+
+		if (a != null) {
+			a.threadLock = null;
+			a.stop();
+		}
+		isTeleop = true;
+		Utils.resetRobot();
+
+		isToggled = false;	}
+
+	boolean isToggled = false;
+
+	/**
+	 * This function is called periodically during operator control
+	 */
+	@Override
+	public void teleopPeriodic() {
+		Scheduler.getInstance().run();
+		
+		driveTrain.teleop(gamepad);
+		speedShift.teleop(gamepad);
+		scalerShift.teleop(gamepad);
+		gearGrabber.teleop(gamepad);
+		intake.teleop(gamepad);
+
+		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
+		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());
+
+		SmartDashboard.putNumber("Speed", driveTrain.getRightTalon().getSpeed());
+		
+		SmartDashboard.putNumber("Left motor", driveTrain.getLeftTalon().get());
+		SmartDashboard.putNumber("Right motor", driveTrain.getRightTalon().get());
+
+		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
+
+		SmartDashboard.putNumber("Distance:  ", camera.getDistance());
+		SmartDashboard.putNumber("Angle:  ", camera.getAngle());
+
+		SmartDashboard.putNumber("LCurrent", driveTrain.getLeftTalon().getOutputCurrent());
+		SmartDashboard.putNumber("RCurrent", driveTrain.getRightTalon().getOutputCurrent());
+
 	}
 
 	/**
