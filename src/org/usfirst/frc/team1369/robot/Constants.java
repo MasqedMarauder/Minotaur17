@@ -28,7 +28,8 @@ public interface Constants {
 	int speedShiftForChan	= 2;
 	int speedShiftRevChan	= 3;
 	
-	int intakePort			= 2;
+	int intakePort			= 1;
+	int shootaurPort		= 2;
 	
 	SPI.Port gyroPort = SPI.Port.kOnboardCS0;
 	
@@ -76,10 +77,12 @@ public interface Constants {
 	
 	float NOMINAL_OUTPUT_VOLTAGE	= 0.0f;
 	float PEAK_OUTPUT_VOLTAGE		= 12.0f;
-	
+	int ANALOG_OUTPUT_VOLTAGE		= 5;
 
+	int RANGE_VOLTAGE_CONSTANT		= 5021;
+	
 	int ENCODER_PPR = 256;
 	double WHEEL_DIAMETER = 4.0;
 	double CLICKS_PER_INCH = (ENCODER_PPR * 4) / (WHEEL_DIAMETER * Math.PI);
-	
+	double VOLTS_PER_MM = (ANALOG_OUTPUT_VOLTAGE/RANGE_VOLTAGE_CONSTANT);
 }

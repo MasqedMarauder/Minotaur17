@@ -42,6 +42,7 @@ public class Robot extends IterativeRobot {
 	public static ScalerShift scalerShift;
 	public static GearGrabber gearGrabber;
 	public static Intake intake;
+	public static Shootaur shootaur;
 
 	public static boolean isTeleop = false;
 	public static boolean isDisabled = false;
@@ -77,6 +78,7 @@ public class Robot extends IterativeRobot {
 		scalerShift = new ScalerShift();
 		gearGrabber = new GearGrabber();
 		intake = new Intake();
+		shootaur = new Shootaur();
 
 		oi = new OI();
 		chooser.addDefault("Nothing", null);
@@ -189,6 +191,7 @@ public class Robot extends IterativeRobot {
 		scalerShift.teleop(gamepad);
 		gearGrabber.teleop(gamepad);
 		intake.teleop(gamepad);
+		shootaur.teleop(gamepad);
 
 		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());

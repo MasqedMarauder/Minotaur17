@@ -30,7 +30,7 @@ public class Intake extends Subsystem implements Constants, Section {
 	public void set(Mode mode) {intake.set(mode.power());}
 	
 	public void teleop(Joystick gamepad) {
-		if (gamepad.getRawButton(BTN_RB)) {set(Mode.OUT);}
+		if (gamepad.getRawButton(BTN_RB)) {set(Mode.IN);}
 		else {set(Mode.STOP);}
 	}
 	
