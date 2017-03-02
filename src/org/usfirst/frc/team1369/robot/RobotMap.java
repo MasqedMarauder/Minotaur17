@@ -29,6 +29,8 @@ public class RobotMap {
 	public static int shootaurIPort = 0;
 	public static int intakePort = 1;
 	public static int shootaurIIPort = 2;
+	
+	public static int ultraSonicPort = 0;
 
 	public static SPI.Port gyroPort = SPI.Port.kOnboardCS0;
 

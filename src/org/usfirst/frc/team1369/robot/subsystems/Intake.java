@@ -1,6 +1,7 @@
 package org.usfirst.frc.team1369.robot.subsystems;
 
 import org.usfirst.frc.team1369.robot.Constants;
+import org.usfirst.frc.team1369.robot.commands.IntakeFuel;
 
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -27,7 +28,7 @@ public class Intake extends Subsystem implements Constants {
 	public void set(Mode mode) {intake.set(mode.power());}
 	
 	public void initDefaultCommand() {
-		System.out.println("Minotaur Intake");
+		setDefaultCommand(new IntakeFuel(Mode.STOP));
 	}
 
 }

@@ -1,6 +1,7 @@
 package org.usfirst.frc.team1369.robot.subsystems;
 
 import org.usfirst.frc.team1369.robot.Constants;
+import org.usfirst.frc.team1369.robot.MinoRangeSensor;
 import org.usfirst.frc.team1369.robot.RobotMap;
 import org.usfirst.frc.team1369.robot.commands.TeleopKajDrive;
 
@@ -18,13 +19,16 @@ public class DriveTrain extends Subsystem implements Constants {
 	private final CANTalon leftSlave, rightSlave;
 	
 	private final ADXRS450_Gyro gyro;
+	private final MinoRangeSensor ultraSonic;
 	
 	public DriveTrain getInstance() {return this;}
 	
 	public CANTalon getLeftTalon() {return leftTalon;}
 	public CANTalon getRightTalon() {return rightTalon;}
 	public ADXRS450_Gyro getGyro() {return gyro;}
+	public MinoRangeSensor getRangeSensor() {return ultraSonic;}
 	public int getRightEncPosition() {return rightTalon.getEncPosition();}
+	public double getUltraSonicInches() {return ultraSonic.getDistance();}
 
 	public DriveTrain() {
 		leftTalon = new CANTalon(RobotMap.masterLeftPort);
@@ -36,6 +40,7 @@ public class DriveTrain extends Subsystem implements Constants {
 		rightSlave = new CANTalon(RobotMap.slaveRightPort);
 
 		gyro = new ADXRS450_Gyro(RobotMap.gyroPort);
+		ultraSonic = new MinoRangeSensor(RobotMap.ultraSonicPort);
 
 		setupSlaves(leftTalon, leftMiddle, leftSlave, true);
 		setupSlaves(rightTalon, rightMiddle, rightSlave, false);
@@ -75,10 +80,10 @@ public class DriveTrain extends Subsystem implements Constants {
 
 		master.setVoltageRampRate(48);
 
-		master.setF(kfDriveTrainVbus);
-		master.setP(kpDriveTrainVbus);
-		master.setI(kiDriveTrainVbus);
-		master.setD(kdDriveTrainVbus);
+		master.setF(kfDriveTrainVel);
+		master.setP(kpDriveTrainVel);
+		master.setI(kiDriveTrainVel);
+		master.setD(kdDriveTrainVel);
 	}
 	
 	public void setControlMode(TalonControlMode mode) {
@@ -154,10 +159,6 @@ public class DriveTrain extends Subsystem implements Constants {
 		if (value < min) value = min;
 		if (value > max) value = max;
 		return value;
-	}
-	
-	public static double deadband(double input) {
-		return Math.abs(input) < 0.15 ? 0.0 : input;
 	}
 	
 }

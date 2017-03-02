@@ -32,6 +32,10 @@ public interface Constants {
 	int intakePort			= 1;
 	int shootaurIIPort		= 2;
 	
+	int indexerPort			= 10;
+	int indexerOpen			= 0;
+	int indexerClosed		= 180;
+	
 	SPI.Port gyroPort = SPI.Port.kOnboardCS0;
 	
 	int gamepadPort = 0;
@@ -53,6 +57,9 @@ public interface Constants {
 	int BTN_LEFT_JOYSTICK	= 9;
 	int BTN_RIGHT_JOYSTICK	= 10;
 	
+	int LEFT_TRIGGER	= 2;
+	int RIGHT_TRIGGER	= 3;
+	
 	int DPAD_NOT_PRESSED = -1;
 	
 	int DPAD_UP		= 0;
@@ -70,10 +77,10 @@ public interface Constants {
 	int DPAD_NORTHWEST	= 315;
 	
 	
-	double kfDriveTrainVbus = .18514;
-	double kpDriveTrainVbus = 0.3;
-	double kiDriveTrainVbus = 0.0;
-	double kdDriveTrainVbus = 0.0;
+	double kfDriveTrainVel = .18514;
+	double kpDriveTrainVel = 0.3;
+	double kiDriveTrainVel = 0.0;
+	double kdDriveTrainVel = 0.0;
 	
 	
 	float NOMINAL_OUTPUT_VOLTAGE	= 0.0f;

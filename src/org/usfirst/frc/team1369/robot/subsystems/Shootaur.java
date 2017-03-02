@@ -1,11 +1,24 @@
 package org.usfirst.frc.team1369.robot.subsystems;
 
 import org.usfirst.frc.team1369.robot.Constants;
+import org.usfirst.frc.team1369.robot.commands.Shoot;
 
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Shootaur extends Subsystem implements Constants  {
+	
+	public Servo indexer;
+	
+	public enum IndexerMode {
+		OPEN (indexerOpen),
+		CLOSED (indexerClosed);
+		
+		private final int position;
+		IndexerMode(int p) {position = p;}
+		public int position() {return position;}
+	}
 	
 	private final VictorSP shootaurI;
 	private final VictorSP shootaurII;
@@ -23,6 +36,8 @@ public class Shootaur extends Subsystem implements Constants  {
 	public Shootaur() {
 		shootaurI = new VictorSP(shootaurIPort);
 		shootaurII = new VictorSP(shootaurIIPort);
+		indexer = new Servo(indexerPort);
+		
 		set(Mode.STOP);
 	}
 	
@@ -32,7 +47,7 @@ public class Shootaur extends Subsystem implements Constants  {
 	}
 	
 	public void initDefaultCommand() {
-		System.out.println("Minotaur Shootaur");
+		setDefaultCommand(new Shoot());
 	}
 
 }

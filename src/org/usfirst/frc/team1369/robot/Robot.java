@@ -2,17 +2,19 @@
 package org.usfirst.frc.team1369.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import org.usfirst.frc.team1369.robot.commands.AutoGearBlueBoiler;
+import org.usfirst.frc.team1369.robot.commands.AutoGearBlueLoader;
+import org.usfirst.frc.team1369.robot.commands.AutoGearCenter;
+import org.usfirst.frc.team1369.robot.commands.AutoGearRedBoiler;
+import org.usfirst.frc.team1369.robot.commands.AutoGearRedLoader;
 import org.usfirst.frc.team1369.robot.commands.ExampleCommand;
-import org.usfirst.frc.team1369.robot.subsystems.DriveTrain;
-import org.usfirst.frc.team1369.robot.subsystems.ExampleSubsystem;
-import org.usfirst.frc.team1369.robot.subsystems.Shootaur;
+import org.usfirst.frc.team1369.robot.subsystems.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,6 +28,10 @@ public class Robot extends IterativeRobot {
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static final DriveTrain driveTrain = new DriveTrain();
 	public static final Shootaur shootaur = new Shootaur();
+	public static final SpeedShift speedShift = new SpeedShift();
+	public static final ClimberShift climberShift = new ClimberShift();
+	public static final GearGrabber gearGrabber = new GearGrabber();
+	public static final Intake intake = new Intake();
 	public static OI oi;
 
 	Command autonomousCommand;
@@ -38,8 +44,11 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		oi = new OI();
-		chooser.addDefault("Default Auto", new ExampleCommand());
-		// chooser.addObject("My Auto", new MyAutoCommand());
+		chooser.addDefault("Auto Gear Center", new AutoGearCenter());
+		chooser.addDefault("Auto Gear Red Loader", new AutoGearRedLoader());
+		chooser.addDefault("Auto Gear Blue Loader", new AutoGearBlueLoader());
+		chooser.addDefault("Auto Gear Red Boiler", new AutoGearRedBoiler());
+		chooser.addDefault("Auto Gear Blue Boiler", new AutoGearBlueBoiler());
 		SmartDashboard.putData("Auto mode", chooser);
 	}
 

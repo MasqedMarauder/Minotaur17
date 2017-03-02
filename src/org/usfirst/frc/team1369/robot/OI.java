@@ -1,10 +1,12 @@
 package org.usfirst.frc.team1369.robot;
 
+import org.usfirst.frc.team1369.robot.subsystems.*;
+import org.usfirst.frc.team1369.robot.triggers.GamepadTrigger;
+import org.usfirst.frc.team1369.robot.commands.*;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
-
-import org.usfirst.frc.team1369.robot.commands.ExampleCommand;
 
 /**
  * This class is the glue that binds the controls on the physical operator
@@ -20,37 +22,47 @@ public class OI implements Constants{
 	// Button button = new JoystickButton(stick, buttonNumber);
 
 	public static final Joystick gamepad = new Joystick(RobotMap.gamepadPort);
-	public static int BTN_A = 1;
-	public static int BTN_B = 2;
-	public static int BTN_X = 3;
-	public static int BTN_Y = 4;
-	public static int BTN_LB = 5;
-	public static int BTN_RB = 6;
-	public static int BTN_BACK = 7;
-	public static int BTN_START = 8;
-	public static int BTN_LEFT_JOYSTICK = 9;
-	public static int BTN_RIGHT_JOYSTICK = 10;
 
-	Button buttonA = new JoystickButton(gamepad, BTN_A),
-			buttonB = new JoystickButton(gamepad, BTN_B),
-			buttonX = new JoystickButton(gamepad, BTN_X),
-			buttonY = new JoystickButton(gamepad, BTN_Y),
-			buttonLB = new JoystickButton(gamepad, BTN_LB),
-			buttonRB = new JoystickButton(gamepad, BTN_RB),
-			buttonBack = new JoystickButton(gamepad, BTN_BACK),
-			buttonStart = new JoystickButton(gamepad, BTN_START);
-			
+	private Button
+		buttonA = new JoystickButton(gamepad, BTN_A),
+		buttonB = new JoystickButton(gamepad, BTN_B),
+		buttonX = new JoystickButton(gamepad, BTN_X),
+		buttonY = new JoystickButton(gamepad, BTN_Y),
+		buttonLB = new JoystickButton(gamepad, BTN_LB),
+		buttonRB = new JoystickButton(gamepad, BTN_RB),
+		buttonBack = new JoystickButton(gamepad, BTN_BACK),
+		buttonStart = new JoystickButton(gamepad, BTN_START),
+		leftTrigger = new GamepadTrigger(gamepad, LEFT_TRIGGER),
+		rightTrigger = new GamepadTrigger(gamepad, RIGHT_TRIGGER);
 	
 	public OI(){
-		
+		buttonRB.whileHeld(new ModGearGrabber(GearGrabber.Mode.OPEN));
+		buttonBack.whenPressed(new PTOShift(ClimberShift.Mode.TOGGLE));
+		buttonB.whileHeld(new Shoot());  //Need to add automatic shooting, check command for info
+		buttonLB.whenPressed(new ShiftSpeed(SpeedShift.Mode.TOGGLE));
+		rightTrigger.whileHeld(new IntakeFuel(Intake.Mode.IN));
 	}
 	
 	public double getLeftY(){
-		return gamepad.getRawAxis(LEFT_Y_AXIS);
+		if(Math.abs(gamepad.getRawAxis(LEFT_Y_AXIS)) > .15)
+			return gamepad.getRawAxis(LEFT_Y_AXIS);
+		else
+			return 0;
 	}
 	
 	public double getRightX(){
-		return gamepad.getRawAxis(LEFT_X_AXIS);
+		if(Math.abs(gamepad.getRawAxis(RIGHT_X_AXIS)) > .15)
+			return gamepad.getRawAxis(RIGHT_X_AXIS);
+		else
+			return 0;
+	}
+	
+	public boolean getLeftTrigger() {
+		return gamepad.getRawAxis(LEFT_TRIGGER) > .9;
+	}
+	
+	public boolean getRightTrigger() {
+		return gamepad.getRawAxis(RIGHT_TRIGGER) > .9;
 	}
 	
 	// There are a few additional built in buttons you can use. Additionally,

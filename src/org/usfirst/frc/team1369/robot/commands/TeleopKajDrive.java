@@ -1,11 +1,9 @@
 package org.usfirst.frc.team1369.robot.commands;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
 
 import org.usfirst.frc.team1369.robot.Constants;
 import org.usfirst.frc.team1369.robot.Robot;
-import org.usfirst.frc.team1369.robot.RobotMap;
 
 /**
  *
@@ -13,13 +11,9 @@ import org.usfirst.frc.team1369.robot.RobotMap;
 public class TeleopKajDrive extends Command implements Constants{
 	
 	private double left_y;
-	private double right_y;
 	private double right_x;
 	
-	//double left_y = Robot.driveTrain.deadband(Robot.gamepad.getRawAxis(LEFT_Y_AXIS));
-	//double right_y = Robot.driveTrain.deadband(Robot.gamepad.getRawAxis(RIGHT_Y_AXIS));
-	//double right_x = Robot.driveTrain.deadband(Robot.gamepad.getRawAxis(RIGHT_X_AXIS));
-
+	
 	public TeleopKajDrive() {
 		requires(Robot.driveTrain);
 	}
@@ -30,7 +24,9 @@ public class TeleopKajDrive extends Command implements Constants{
 
 	@Override
 	protected void execute() {
-		/*if (!Robot.scalerShift.isScaleMode()) {
+		left_y = Robot.oi.getLeftY();
+		right_x = Robot.oi.getRightX();
+		if (!Robot.climberShift.isScaleMode()) {
 			double leftPower = left_y - right_x;
 			double rightPower = left_y + right_x;
 	
@@ -46,7 +42,7 @@ public class TeleopKajDrive extends Command implements Constants{
 		} else {
 			Robot.driveTrain.driveVbus(-left_y, left_y);
 		}
-		*/
+		
 	}
 
 	@Override

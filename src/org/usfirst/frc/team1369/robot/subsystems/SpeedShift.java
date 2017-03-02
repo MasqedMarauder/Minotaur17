@@ -8,10 +8,12 @@ public class SpeedShift extends MinoDoubleSol {
 	public enum Mode {
 		SPEED (Value.kReverse),
 		TORQUE (Value.kForward),
-		DISABLED (Value.kOff);
+		DISABLED (Value.kOff),
+		TOGGLE;
 		
 		private final Value value;
 		Mode(Value val) {value = val;}
+		Mode() {value = null;}
 		public Value value() {return value;}
 	}
 	
@@ -27,7 +29,10 @@ public class SpeedShift extends MinoDoubleSol {
 		smartDashboard();
 	}
 	
-	public void set(Mode mode) {set(mode.value);}
+	public void set(Mode mode) {
+		if (mode == Mode.TOGGLE) toggle();
+		else set(mode.value);
+	}
 	
 	public boolean isSpeedMode() {return getValue() == Mode.SPEED.value;}
 	public boolean isTorqueMode() {return getValue() == Mode.TORQUE.value;}
