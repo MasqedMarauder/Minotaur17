@@ -222,7 +222,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		resetEncoders();
 
 		int targetClicks = (int) (inches * CLICKS_PER_INCH);
-		int clicksRemainiFng;
+		int clicksRemaining;
 		double inchesRemaining;
 		double power;
 		double p_gain = 0.3;

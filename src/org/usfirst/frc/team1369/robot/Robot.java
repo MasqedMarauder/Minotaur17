@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import org.usfirst.frc.team1369.robot.auto.AutonomousGearBlueBoiler;
+import org.usfirst.frc.team1369.robot.auto.AutonomousWatchdog;
 import org.usfirst.frc.team1369.robot.commands.Auto;
 import org.usfirst.frc.team1369.robot.commands.AutoGearBlueBoiler;
 import org.usfirst.frc.team1369.robot.commands.AutoGearBlueLoader;
@@ -147,6 +149,11 @@ public class Robot extends IterativeRobot {
 		a = chooser.getSelected();
 		if (a != null)
 			a.auto();
+		
+		AutonomousGearBlueBoiler auto = null;
+		AutonomousWatchdog watch = new AutonomousWatchdog(auto);
+		
+		watch.start();
 	}
 
 	AutoGearCenter auto = new AutoGearCenter();
