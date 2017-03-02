@@ -25,11 +25,12 @@ public interface Constants {
 	int scalerShiftForChan	= 4;
 	int scalerShiftRevChan	= 5;
 	
-	int speedShiftForChan	= 2;
-	int speedShiftRevChan	= 3;
+	int speedShiftForChan	= 3;
+	int speedShiftRevChan	= 2;
 	
+	int shootaurIPort		= 0;
 	int intakePort			= 1;
-	int shootaurPort		= 2;
+	int shootaurIIPort		= 2;
 	
 	SPI.Port gyroPort = SPI.Port.kOnboardCS0;
 	

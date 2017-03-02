@@ -19,6 +19,7 @@ import org.usfirst.frc.team1369.robot.commands.AutoGearCenter;
 import org.usfirst.frc.team1369.robot.commands.AutoPIDTuning;
 import org.usfirst.frc.team1369.robot.commands.AutoTestCamera;
 import org.usfirst.frc.team1369.robot.commands.AutoTestCamera2;
+import org.usfirst.frc.team1369.robot.commands.AutoTestMotion;
 import org.usfirst.frc.team1369.robot.subsystems.*;
 import org.usfirst.frc.team1369.robot.subsystems.DriveTrain.Direction;
 import org.usfirst.frc.team1369.robot.subsystems.SpeedShift.Mode;
@@ -43,6 +44,7 @@ public class Robot extends IterativeRobot {
 	public static GearGrabber gearGrabber;
 	public static Intake intake;
 	public static Shootaur shootaur;
+	public static MinoRangeSensor rangeSensor;
 
 	public static boolean isTeleop = false;
 	public static boolean isDisabled = false;
@@ -60,18 +62,26 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 		gamepad = new Joystick(Constants.gamepadPort);
 
-/*
-		SmartDashboard.putNumber("Left PID Constant P", Constants.kpDriveTrainVbus);
-		SmartDashboard.putNumber("Left PID Constant I", Constants.kiDriveTrainVbus);
-		SmartDashboard.putNumber("Left PID Constant D", Constants.kdDriveTrainVbus);
-		SmartDashboard.putNumber("Left PID Constant F", Constants.kfDriveTrainVbus);
+		/*
+		 * SmartDashboard.putNumber("Left PID Constant P",
+		 * Constants.kpDriveTrainVbus);
+		 * SmartDashboard.putNumber("Left PID Constant I",
+		 * Constants.kiDriveTrainVbus);
+		 * SmartDashboard.putNumber("Left PID Constant D",
+		 * Constants.kdDriveTrainVbus);
+		 * SmartDashboard.putNumber("Left PID Constant F",
+		 * Constants.kfDriveTrainVbus);
+		 * 
+		 * SmartDashboard.putNumber("Right PID Constant P",
+		 * Constants.kpDriveTrainVbus);
+		 * SmartDashboard.putNumber("Right PID Constant I",
+		 * Constants.kiDriveTrainVbus);
+		 * SmartDashboard.putNumber("Right PID Constant D",
+		 * Constants.kdDriveTrainVbus);
+		 * SmartDashboard.putNumber("right PID Constant F",
+		 * Constants.kfDriveTrainVbus);
+		 */
 
-		SmartDashboard.putNumber("Right PID Constant P", Constants.kpDriveTrainVbus);
-		SmartDashboard.putNumber("Right PID Constant I", Constants.kiDriveTrainVbus);
-		SmartDashboard.putNumber("Right PID Constant D", Constants.kdDriveTrainVbus);
-		SmartDashboard.putNumber("right PID Constant F", Constants.kfDriveTrainVbus);
-*/
-		
 		camera = new Camera();
 		driveTrain = new DriveTrain();
 		speedShift = new SpeedShift();
@@ -79,7 +89,7 @@ public class Robot extends IterativeRobot {
 		gearGrabber = new GearGrabber();
 		intake = new Intake();
 		shootaur = new Shootaur();
-
+		rangeSensor = new MinoRangeSensor(0);
 		oi = new OI();
 		chooser.addDefault("Nothing", null);
 		chooser.addObject("GearTest", new AutoGearCenter());
@@ -88,6 +98,7 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("CameraTest", new AutoTestCamera());
 		chooser.addObject("CameraDriving", new AutoTestCamera2());
 		chooser.addObject("PID TUning", new AutoPIDTuning());
+		chooser.addObject("StraightLineTest", new AutoTestMotion());
 		// chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new GearAuto());
 		SmartDashboard.putData("Apoorvas", chooser);
@@ -106,13 +117,15 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void disabledInit() {
-		isTeleop = false;
-		isDisabled = true;
-
+		Robot.isTeleop = false;
+		Robot.isDisabled = true;
+		SmartDashboard.putNumber("Disabled Init Ran", 1);
 	}
 
 	@Override
 	public void disabledPeriodic() {
+		Robot.isDisabled = true;
+		SmartDashboard.putNumber("Disabled Init Ran", 2);
 		Scheduler.getInstance().run();
 	}
 
@@ -129,8 +142,11 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
+		Robot.isDisabled = false;
+		SmartDashboard.putNumber("Disabled Init Ran", 0);
 		a = chooser.getSelected();
-		a.auto();
+		if (a != null)
+			a.auto();
 	}
 
 	AutoGearCenter auto = new AutoGearCenter();
@@ -167,6 +183,7 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
+		SmartDashboard.putNumber("retard", 24525);
 
 		if (a != null) {
 			a.threadLock = null;
@@ -175,7 +192,8 @@ public class Robot extends IterativeRobot {
 		isTeleop = true;
 		Utils.resetRobot();
 
-		isToggled = false;	}
+		isToggled = false;
+	}
 
 	boolean isToggled = false;
 
@@ -185,7 +203,7 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
-		
+
 		driveTrain.teleop(gamepad);
 		speedShift.teleop(gamepad);
 		scalerShift.teleop(gamepad);
@@ -193,11 +211,12 @@ public class Robot extends IterativeRobot {
 		intake.teleop(gamepad);
 		shootaur.teleop(gamepad);
 
+		SmartDashboard.putNumber("Distance form egeg", rangeSensor.getDistance());
 		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());
 
 		SmartDashboard.putNumber("Speed", driveTrain.getRightTalon().getSpeed());
-		
+
 		SmartDashboard.putNumber("Left motor", driveTrain.getLeftTalon().get());
 		SmartDashboard.putNumber("Right motor", driveTrain.getRightTalon().get());
 

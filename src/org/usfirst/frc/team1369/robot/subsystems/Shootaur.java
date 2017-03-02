@@ -8,7 +8,8 @@ import edu.wpi.first.wpilibj.VictorSP;
 
 public class Shootaur  implements Constants, Section  {
 	
-	private final VictorSP shootaur;
+	private final VictorSP shootaurI;
+	private final VictorSP shootaurII;
 	public enum Mode {
 		IN (-0.75),
 		OUT (+0.75),
@@ -22,11 +23,13 @@ public class Shootaur  implements Constants, Section  {
 	}
 
 	public Shootaur() {
-		shootaur = new VictorSP(shootaurPort);
-		set(Mode.IN);
+		shootaurI = new VictorSP(shootaurIPort);
+		shootaurII = new VictorSP(shootaurIIPort);
+		set(Mode.STOP);
 	}
 	
-	public void set(Mode mode) {shootaur.set(mode.power());}
+	public void set(Mode mode) {shootaurI.set(-mode.power()); shootaurII.set(mode.power());
+	}
 	
 	public void teleop(Joystick gamepad) {
 		if (gamepad.getRawButton(BTN_Y)) {set(Mode.OUT);}

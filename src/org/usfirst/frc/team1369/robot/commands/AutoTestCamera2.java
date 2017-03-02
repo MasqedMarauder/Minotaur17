@@ -53,13 +53,7 @@ public class AutoTestCamera2 extends Auto {
 		
 		double angle = Robot.camera.getAngle();
 		Direction dir;
-		if(angle < 0){
-			dir = Direction.COUNTERCLOCKWISE;
-		}
-		else{
-			dir = Direction.CLOCKWISE;
-		}
-		Robot.driveTrain.turnP(angle/2, dir, .75, 10);
+		Robot.driveTrain.turnP(angle/2, angle < 0 ? Direction.COUNTERCLOCKWISE : Direction.CLOCKWISE, .75, 10);
 		}catch(Exception e){
 		}
 	}

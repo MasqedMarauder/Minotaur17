@@ -18,6 +18,7 @@ public class Utils {
 		Robot.scalerShift.reset();
 		Robot.gearGrabber.reset();
 		Robot.intake.reset();
+		Robot.shootaur.reset();
 
 		Robot.driveTrain.getLeftTalon().setEncPosition(0);
 		Robot.driveTrain.getRightTalon().setEncPosition(0);

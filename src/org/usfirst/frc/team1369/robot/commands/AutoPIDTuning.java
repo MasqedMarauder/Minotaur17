@@ -26,24 +26,15 @@ public class AutoPIDTuning extends Auto {
 	
 	public void auto() {
 		try{
+			Robot.isDisabled = false;
 			Robot.speedShift.set(Mode.TORQUE);
 			Utils.sleep(500);
 			
 			Utils.resetRobot();
 			Utils.sleep(1000);
 	
-			Robot.driveTrain.resetEncoders();
-			//Robot.driveTrain.memeMove(SmartDashboard.getNumber("Distance 2 Move", 12), 25, 20);
-			Robot.driveTrain.moveInches(convert(SmartDashboard.getNumber("Distance 2 Move", 12)), Direction.BACKWARD, 
-					(int)SmartDashboard.getNumber("Allowable Error", 40));
-			Robot.driveTrain.turnP(48, Direction.COUNTERCLOCKWISE, .75, 10);
-			Robot.driveTrain.moveInches(convert(SmartDashboard.getNumber("Distance 2 Move", 12)), Direction.BACKWARD, 
-					(int)SmartDashboard.getNumber("Allowable Error", 40));
-			
-			
-			Utils.sleep(20);
-			Robot.driveTrain.stopDrive();
-			//Robot.speedShift.set(Mode.SPEED);
+			Robot.driveTrain.turnP(90, Direction.CLOCKWISE, 0.75, 1);
+			Utils.sleep(100);
 		}catch(Exception e){
 			System.out.println("Auto Interrupted");
 		}

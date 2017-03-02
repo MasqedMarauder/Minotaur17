@@ -1,5 +1,7 @@
 package org.usfirst.frc.team1369.robot.subsystems;
 
+import java.util.Set;
+
 import org.usfirst.frc.team1369.robot.Constants;
 import org.usfirst.frc.team1369.robot.Robot;
 import org.usfirst.frc.team1369.robot.Utils;
@@ -141,7 +143,9 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		rightTalon.setEncPosition(0);
 		try {
 			Thread.sleep(500);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
+			
 		}
 	}
 
@@ -284,6 +288,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		
 		//0.25 - Varun's P
 		
+		/*
 		leftTalon.setP(SmartDashboard.getNumber("Left PID Constant P", kpDriveTrainVbus));
 		leftTalon.setI(SmartDashboard.getNumber("Left PID Constant I", kiDriveTrainVbus));
 		leftTalon.setD(SmartDashboard.getNumber("Left PID Constant D", kdDriveTrainVbus));
@@ -293,6 +298,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		rightTalon.setI(SmartDashboard.getNumber("Right PID Constant I", kiDriveTrainVbus));
 		rightTalon.setD(SmartDashboard.getNumber("Right PID Constant D", kdDriveTrainVbus));
 		rightTalon.setF(SmartDashboard.getNumber("Right PID Constant F", kfDriveTrainVbus));
+		*/
 
 		setTarget(inchesToApporvas(inches) * direction.value);
 		int count = 0;
@@ -319,27 +325,83 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		leftTalon.setProfile(0);
 
 	}
-
 	public void turnP(double degrees, Direction direction, double speed, double allowableError) throws AutoInterruptedException{
 		resetGyro();
 		setControlMode(TalonControlMode.PercentVbus);
 		double error;
 		double power;
-		double kp = 0.025;
+		double kp = 0.04;
+		double integral = 0;
+		double ki = 0.00005;
+		double prevTime = System.currentTimeMillis();
 
+		double sTime = System.currentTimeMillis();
+		
+		int count = 0;
 		do {
 			
-			if(Robot.isDisabled){
+			if(Robot.isTeleop || Robot.isDisabled){
 				throw new AutoInterruptedException();
 			}
+			
 			else{
 				error = direction.value * degrees - gyro.getAngle();
-				power = kp * error;
-				power = clip(power, -speed, +speed);
-				setTarget(+power, +power);
+				integral += error * (System.currentTimeMillis() - prevTime);
+				prevTime = System.currentTimeMillis();
+				power = kp * error + ki * integral;
+  				power = clip(power, -speed, +speed);
+				setTarget(power, power);
+				
+				if(Math.abs(error) < allowableError){
+					count++;
+				}
+				else{
+					count = 0;
+				}
 			}
 			System.out.println("turning: " + degrees + ":" + direction.toString() + ":" + speed);
-		} while (Math.abs(error) > allowableError);
+		} while (count < 500);
+		System.out.println("Completed");
+		stopDrive();
+	}
+
+	public void turnP(double degrees, Direction direction, double speed, double allowableError, double killTime) throws AutoInterruptedException{
+		resetGyro();
+		setControlMode(TalonControlMode.PercentVbus);
+		double error;
+		double power;
+		double kp = 0.05;
+		double integral = 0;
+		double ki = 0.00003;
+		double prevTime = System.currentTimeMillis();
+
+		double sTime = System.currentTimeMillis();
+		
+		int count = 0;
+		System.out.println("turning");
+		do {
+			
+			if(Robot.isTeleop || Robot.isDisabled){
+				throw new AutoInterruptedException();
+			}
+			
+			else{
+				error = direction.value * (Math.abs(degrees) > 60 ? 0 : Math.abs(degrees)) - gyro.getAngle();
+				integral += error * (System.currentTimeMillis() - prevTime);
+				prevTime = System.currentTimeMillis();
+				power = kp * error + ki * integral;
+  				power = clip(power, -speed, +speed);
+				setTarget(power, power);
+				
+				if(Math.abs(error) < allowableError){
+					count++;
+				}
+				else{
+					count = 0;
+				}
+			}
+		} while (count < 500 && System.currentTimeMillis() - sTime < killTime);
+		System.out.println("Completed");
 		stopDrive();
 	}
 
@@ -375,17 +437,23 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		stopDrive();
 	}
 
-	public void moveByGyroDistance(double inches, Direction direction, double speed) {
+	public void moveByGyroDistance(double inches, Direction direction, double speed, double allowableError, double timeKill) throws AutoInterruptedException {
+	stopDrive();
+	}
+		
+		
+	public void moveByGyroDistance(double inches, Direction direction, double speed) throws Exception {	
+	
 		resetEncoders();
 		resetGyro();
+		
+		setControlMode(TalonControlMode.Speed);
 
 		int targetClicks = (int) (inches * CLICKS_PER_INCH);
 		int clicksRemaining;
 		double inchesRemaining;
 		double angularError;
-		double prevAngularError = 0;
-		double angularIntegral = 0;
-		double angularDerivative;
+		double dIntegral = 0;
 		double powerAdjustment;
 		double power;
 		double leftPower;
@@ -395,34 +463,80 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		long prevTime = System.nanoTime();
 
 		double p_gain = 0.05;
+		double i_gain = 0.00005;
 		double kp = 0.05;
-		double ki = 0.0;
-		double kd = 0.0;
-		double iDamper = 1.0;
-
+		//double ki = 0.00005;
+		//double kd = 0.0;
+		//double iDamper = 1.0;
+		
+		//int count = 0;
+		//double time = System.currentTimeMillis();
+		System.out.println("moving");
 		do {
+			
+			System.out.println("David 1");
+			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+			Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+			for(int i = 0; i < threadArray.length; i++) {
+				System.out.println(threadArray[i]);
+			}
+			System.out.println("isDisabled = " + Robot.isDisabled);
+			if(Robot.isDisabled || Robot.isTeleop) {
+				System.out.println("David 2");
+				throw new Exception();
+			}
+			
 			clicksRemaining = targetClicks - Math.abs(rightTalon.getEncPosition());
 			inchesRemaining = clicksRemaining / CLICKS_PER_INCH;
-			power = direction.value * speed * inchesRemaining * p_gain;
-			power = clip(power, -1.0, +1.0);
+			
 			dt = System.nanoTime() - prevTime;
 			prevTime = System.nanoTime();
+			
+			dIntegral += inchesRemaining * dt;
+			
+			power = inchesRemaining * p_gain + dIntegral * i_gain;
+			power *= speed * direction.value;
+			power = clip(power, -speed, speed);
+			
 			angularError = -gyro.getAngle();
-			angularIntegral = iDamper * angularIntegral + angularError * dt;
-			angularDerivative = (angularError - prevAngularError) / dt;
-			prevAngularError = angularError;
-			powerAdjustment = kp * angularError + ki * angularIntegral + kd * angularDerivative;
-			powerAdjustment = clip(powerAdjustment, -1.0, +1.0);
+			System.out.println("Angular Error: " + angularError);
+			powerAdjustment = kp * angularError;
 			powerAdjustment *= direction.value;
-			leftPower = power - powerAdjustment;
-			rightPower = power + powerAdjustment;
+			powerAdjustment = clip(powerAdjustment, -1.0, +1.0);
+			
+			if(direction == Direction.BACKWARD){
+				leftPower = power + powerAdjustment;
+				rightPower = power - powerAdjustment;
+			}
+			else{
+				leftPower = power - powerAdjustment;
+				rightPower = power + powerAdjustment;
+			}
 			maxPower = Math.max(Math.abs(leftPower), Math.abs(rightPower));
 			if (maxPower > 1.0) {
 				leftPower /= maxPower;
 				rightPower /= maxPower;
 			}
-			setTarget(leftPower, rightPower);
-		} while (inchesRemaining > 0.5 || Math.abs(angularError) > 0.5);
+			
+			/*
+				angularIntegral = iDamper * angularIntegral + angularError * dt;
+				angularDerivative = (angularError - prevAngularError) / dt;
+				prevAngularError = angularError;
+				powerAdjustment = kp * angularError + ki * angularIntegral + kd * angularDerivative;
+			*/
+			setTarget(1250 * leftPower, 1250 * rightPower);
+			/*if(inchesRemaining < allowableError){
+				count ++;
+			}
+			else{
+				count = 0;
+			}*/
+			
+			
+			
+		} while(inchesRemaining > 3 || angularError > 2);
+		//while (count < 500 && System.currentTimeMillis() - time < timeKill);
+		System.out.println("finished");
 		stopDrive();
 	}
 
