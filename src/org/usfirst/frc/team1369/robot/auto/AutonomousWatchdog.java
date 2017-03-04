@@ -14,6 +14,7 @@ public class AutonomousWatchdog extends Thread {
 	public void run() {
 		this.autonomous.start();
 		try {
+			System.out.println("Waiting");
 			Thread.sleep(15000);
 		}
 		catch(Exception e) {
@@ -22,8 +23,11 @@ public class AutonomousWatchdog extends Thread {
 		finally {
 			if(autonomous.isAlive()) {
 				this.autonomous.interrupt();
+				this.autonomous.stop();
+				System.out.println("Interrupted");
 			}
 			this.autonomous.endExecution();
+			System.out.println("Ended");
 		}
 	}
 	

@@ -41,7 +41,7 @@ public class SpeedShift extends MinoDoubleSol {
 	}
 
 	public void teleop(Joystick gamepad) {
-		if (gamepad.getRawButton(BTN_X)) {
+		if (gamepad.getRawButton(BTN_RB)) {
 			toggle();
 		}
 	}

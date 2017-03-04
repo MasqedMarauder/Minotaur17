@@ -1,11 +1,7 @@
 package org.usfirst.frc.team1369.robot.subsystems;
 
-import java.util.Set;
-
 import org.usfirst.frc.team1369.robot.Constants;
 import org.usfirst.frc.team1369.robot.Robot;
-import org.usfirst.frc.team1369.robot.Utils;
-import org.usfirst.frc.team1369.robot.subsystems.SpeedShift.Mode;
 
 import com.ctre.CANTalon;
 import com.ctre.CANTalon.FeedbackDevice;
@@ -14,7 +10,6 @@ import com.ctre.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class DriveTrain extends Subsystem implements Constants, Section {
 
@@ -133,7 +128,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 	}
 
 	public void stopDrive() {
-		setControlMode(TalonControlMode.PercentVbus);
+		setControlMode(TalonControlMode.Speed);
 		setTarget(0);
 	}
 
@@ -142,7 +137,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		leftTalon.setEncPosition(0);
 		rightTalon.setEncPosition(0);
 		try {
-			Thread.sleep(500);
+			Thread.sleep(100);
 		} 
 		catch (Exception e) {
 			
@@ -152,7 +147,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 	public void resetGyro() {
 		gyro.reset();
 		try {
-			Thread.sleep(500);
+			Thread.sleep(100);
 		} catch (Exception e) {
 		}
 	}
@@ -218,7 +213,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		return value;
 	}
 
-	public void moveByDistance(double inches, Direction direction, double speed) {
+	/*public void moveByDistance(double inches, Direction direction, double speed) {
 		resetEncoders();
 
 		int targetClicks = (int) (inches * CLICKS_PER_INCH);
@@ -236,13 +231,13 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 				break;
 		} while (inchesRemaining > 0.5);
 		stopDrive();
-	}
+	}*/
 
-	public double inchesToApporvas(double inches) {
+	/*public double inchesToApporvas(double inches) {
 		return inches / (4 * Math.PI);
-	}
+	}*/
 
-	public boolean memeMove(double inches, int speed, int allowableError) throws AutoInterruptedException {
+	/*public boolean memeMove(double inches, int speed, int allowableError) throws AutoInterruptedException {
 		inches = inches * 256 / (4 * Math.PI);
 
 		SmartDashboard.putNumber("Laft Target", inches);
@@ -277,12 +272,12 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		
 		
 		return true;
-	}
+	}*/
 	
-	public boolean moveInches(double inches, Direction direction, int allowableError) throws AutoInterruptedException{
+	/*public boolean moveInches(double inches, Direction direction, int allowableError) throws AutoInterruptedException{
 		//resetEncoders();
 		setControlMode(TalonControlMode.Position);
-		leftTalon.setProfile(1);
+	/*	leftTalon.setProfile(1);
 		rightTalon.setProfile(1);
 		Utils.sleep(100);
 		
@@ -300,7 +295,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		rightTalon.setF(SmartDashboard.getNumber("Right PID Constant F", kfDriveTrainVbus));
 		*/
 
-		setTarget(inchesToApporvas(inches) * direction.value);
+	/*	setTarget(inchesToApporvas(inches) * direction.value);
 		int count = 0;
 		do {
 			setTarget(inchesToApporvas(inches) * direction.value);
@@ -316,15 +311,16 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		rightTalon.setProfile(0);
 		stopPositionDrive();
 		return true;
-	}
+	}*/
 
-	private void stopPositionDrive() {
+	/*private void stopPositionDrive() {
 		SmartDashboard.putString("Stopped", "dude");
 		stopDrive();
 		leftTalon.setProfile(0);
 		leftTalon.setProfile(0);
 
-	}
+	}*/
+	
 	public void turnP(double degrees, Direction direction, double speed, double allowableError) throws AutoInterruptedException{
 		resetGyro();
 		setControlMode(TalonControlMode.PercentVbus);
@@ -365,7 +361,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		stopDrive();
 	}
 
-	public void turnP(double degrees, Direction direction, double speed, double allowableError, double killTime) throws AutoInterruptedException{
+	/*public void turnP(double degrees, Direction direction, double speed, double allowableError, double killTime) throws AutoInterruptedException{
 		resetGyro();
 		setControlMode(TalonControlMode.PercentVbus);
 		double error;
@@ -403,11 +399,23 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		} while (count < 500 && System.currentTimeMillis() - sTime < killTime);
 		System.out.println("Completed");
 		stopDrive();
-	}
+	}*/
 
 	public static boolean robotStop = false;
-
+	
 	public void turnPID(double degrees, Direction direction, double speed) {
+		turnPID(degrees, direction, speed, 0.025);
+	}
+	
+	public void turnPID(double degrees, Direction direction, double speed, double kp) {
+		turnPID(degrees, direction, speed, kp, 0.0, 0.0);
+	}
+	
+	public void turnPID(double degrees, Direction direction, double speed, double kp, double ki, double kd) {
+		turnPID(degrees, direction, speed, kp, ki, kd, 1.0);
+	}
+
+	public void turnPID(double degrees, Direction direction, double speed, double kp, double ki, double kd, double iDamper) {
 		resetGyro();
 
 		double error = direction.value * degrees - gyro.getAngle();
@@ -418,10 +426,10 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		long dt;
 		long prevTime = System.nanoTime();
 
-		double kp = 0.025;
-		double ki = 0.0;
-		double kd = 0.0;
-		double iDamper = 1.0;
+		//double kp = 0.025;
+		//double ki = 0.0;
+		//double kd = 0.0;
+		//double iDamper = 1.0;
 
 		do {
 			dt = System.nanoTime() - prevTime;
@@ -436,13 +444,16 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		} while (Math.abs(error) > 0.5);
 		stopDrive();
 	}
-
-	public void moveByGyroDistance(double inches, Direction direction, double speed, double allowableError, double timeKill) throws AutoInterruptedException {
-	stopDrive();
+		
+	public void moveByGyroDistance(double inches, Direction direction, double speed) throws Exception {
+		moveByGyroDistance(inches, direction, speed, 5000);
+	}
+	
+	public void moveByGyroDistance(double inches, Direction direction, double speed, double timeout) throws Exception {
+		moveByGyroDistance(inches, direction, speed, timeout, 0.05);
 	}
 		
-		
-	public void moveByGyroDistance(double inches, Direction direction, double speed) throws Exception {	
+	public void moveByGyroDistance(double inches, Direction direction, double speed, double mTimeOut, double p_gain) throws Exception {	
 	
 		resetEncoders();
 		resetGyro();
@@ -462,7 +473,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		long dt;
 		long prevTime = System.nanoTime();
 
-		double p_gain = 0.05;
+		//double p_gain = 0.05;
 		double i_gain = 0.00005;
 		double kp = 0.05;
 		//double ki = 0.00005;
@@ -470,16 +481,18 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		//double iDamper = 1.0;
 		
 		//int count = 0;
-		//double time = System.currentTimeMillis();
+		double time = System.currentTimeMillis();
 		System.out.println("moving");
 		do {
 			
 			System.out.println("David 1");
-			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+			/**
+			 * Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 			Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
 			for(int i = 0; i < threadArray.length; i++) {
 				System.out.println(threadArray[i]);
 			}
+			 */
 			System.out.println("isDisabled = " + Robot.isDisabled);
 			if(Robot.isDisabled || Robot.isTeleop) {
 				System.out.println("David 2");
@@ -534,7 +547,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 			
 			
 			
-		} while(inchesRemaining > 3 || angularError > 2);
+		} while((inchesRemaining > 3 || angularError > 2) && System.currentTimeMillis() - time < mTimeOut);
 		//while (count < 500 && System.currentTimeMillis() - time < timeKill);
 		System.out.println("finished");
 		stopDrive();
@@ -585,6 +598,7 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 			 * driveVelocity(1250 * leftPower, 1250 * rightPower); break; }
 			 */
 		} else {
+			left_y = Math.abs(left_y);
 			driveVbus(-left_y, left_y);
 		}
 	}

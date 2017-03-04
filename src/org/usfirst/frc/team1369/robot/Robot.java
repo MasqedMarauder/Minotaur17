@@ -6,14 +6,20 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Joystick.ButtonType;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import org.usfirst.frc.team1369.robot.auto.AutonomousGearBlueBoiler;
+import org.usfirst.frc.team1369.robot.auto.Autonomous;
 import org.usfirst.frc.team1369.robot.auto.AutonomousWatchdog;
+import org.usfirst.frc.team1369.robot.auto.gear.AutonomousGearRightTurn;
+import org.usfirst.frc.team1369.robot.auto.gear.AutonomousPIDTest;
+import org.usfirst.frc.team1369.robot.auto.gear.AutonomousGearLeftTurn;
+import org.usfirst.frc.team1369.robot.auto.gear.AutonomousCameraTest;
+import org.usfirst.frc.team1369.robot.auto.gear.AutonomousGearCenter;
 import org.usfirst.frc.team1369.robot.commands.Auto;
 import org.usfirst.frc.team1369.robot.commands.AutoGearBlueBoiler;
 import org.usfirst.frc.team1369.robot.commands.AutoGearBlueLoader;
@@ -35,6 +41,8 @@ import org.usfirst.frc.team1369.robot.subsystems.SpeedShift.Mode;
  */
 public class Robot extends IterativeRobot {
 
+	public static Servo indexerServo = new Servo(3);
+	
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
 
@@ -52,18 +60,24 @@ public class Robot extends IterativeRobot {
 	public static boolean isDisabled = false;
 
 	Command autonomousCommand;
-	SendableChooser<Auto> chooser = new SendableChooser<>();
+	SendableChooser<Autonomous> chooser = new SendableChooser<>();
 
 	public static Camera camera;
 
 	/**
 	 * This function is run when the robot is first started up and should be
-	 * used for any initialization code.
+	 * used for any initialization code.z
 	 */
 	@Override
 	public void robotInit() {
 		gamepad = new Joystick(Constants.gamepadPort);
 
+		SmartDashboard.putNumber("Tune P", 0);
+		SmartDashboard.putNumber("Tune I", 0);
+		SmartDashboard.putNumber("Tune D", 0);
+		SmartDashboard.putNumber("Tune Damper", 0);
+		
+		
 		/*
 		 * SmartDashboard.putNumber("Left PID Constant P",
 		 * Constants.kpDriveTrainVbus);
@@ -84,7 +98,11 @@ public class Robot extends IterativeRobot {
 		 * Constants.kfDriveTrainVbus);
 		 */
 
-		camera = new Camera();
+		if (camera == null) {
+			camera = new Camera();
+			camera.start();
+		}
+		
 		driveTrain = new DriveTrain();
 		speedShift = new SpeedShift();
 		scalerShift = new ScalerShift();
@@ -93,19 +111,29 @@ public class Robot extends IterativeRobot {
 		shootaur = new Shootaur();
 		rangeSensor = new MinoRangeSensor(0);
 		oi = new OI();
-		chooser.addDefault("Nothing", null);
-		chooser.addObject("GearTest", new AutoGearCenter());
-		chooser.addObject("BlueLoader", new AutoGearBlueLoader());
-		chooser.addObject("BlueBoiler", new AutoGearBlueBoiler());
-		chooser.addObject("CameraTest", new AutoTestCamera());
-		chooser.addObject("CameraDriving", new AutoTestCamera2());
-		chooser.addObject("PID TUning", new AutoPIDTuning());
-		chooser.addObject("StraightLineTest", new AutoTestMotion());
-		// chooser.addDefault("Default Auto", new ExampleCommand());
-		// chooser.addObject("My Auto", new GearAuto());
-		SmartDashboard.putData("Apoorvas", chooser);
 
-		camera.start();
+		chooser.addDefault("Nothing", null);
+		chooser.addObject("Gear - Center", new AutonomousGearCenter());
+		chooser.addObject("Gear - Left Setup - Right Turn", new AutonomousGearRightTurn());
+		chooser.addObject("Gear - Right Setup - Left Turn", new AutonomousGearLeftTurn());
+		chooser.addObject("Auto Camera Test", new AutonomousCameraTest());
+		chooser.addObject("Auto PID Test", new AutonomousPIDTest());
+		
+		/*
+		 * chooser.addDefault("Nothing", null); chooser.addObject("GearTest",
+		 * new AutoGearCenter()); chooser.addObject("BlueLoader", new
+		 * AutoGearBlueLoader()); chooser.addObject("BlueBoiler", new
+		 * AutoGearBlueBoiler()); chooser.addObject("CameraTest", new
+		 * AutoTestCamera()); chooser.addObject("CameraDriving", new
+		 * AutoTestCamera2()); chooser.addObject("PID TUning", new
+		 * AutoPIDTuning()); chooser.addObject("StraightLineTest", new
+		 * AutoTestMotion()); // chooser.addDefault("Default Auto", new
+		 * ExampleCommand());
+		 */
+		// chooser.addObject("My Auto", new GearAuto());
+		SmartDashboard.putData("Choose tf upppp 100", chooser);
+		
+		
 
 		Robot.speedShift.set(Mode.TORQUE);
 
@@ -146,18 +174,26 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		Robot.isDisabled = false;
 		SmartDashboard.putNumber("Disabled Init Ran", 0);
-		a = chooser.getSelected();
-		if (a != null)
-			a.auto();
 		
-		AutonomousGearBlueBoiler auto = null;
-		AutonomousWatchdog watch = new AutonomousWatchdog(auto);
-		
-		watch.start();
-	}
+		camera.setExposure(1);
 
-	AutoGearCenter auto = new AutoGearCenter();
-	private Auto a;
+		try {
+			Autonomous auto = chooser.getSelected();
+			auto = auto.getClass().newInstance();// - Might work for testing purposes 
+			
+			if (auto != null) {
+				AutonomousWatchdog doggo = new AutonomousWatchdog(auto);
+				doggo.start();
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
+		// AutonomousGearBlueBoiler auto = null;
+		// AutonomousWatchdog watch = new AutonomousWatchdog(auto);
+
+		// watch.start();
+	}
 
 	/**
 	 * This function is called periodically during autonomous
@@ -169,12 +205,7 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());
-
-		SmartDashboard.putNumber("Left motor", driveTrain.getLeftTalon().get());
-		SmartDashboard.putNumber("Right motor", driveTrain.getRightTalon().get());
-
-		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
-
+		
 		SmartDashboard.putNumber("Distance:  ", camera.getDistance());
 		SmartDashboard.putNumber("Angle:  ", camera.getAngle());
 
@@ -183,27 +214,24 @@ public class Robot extends IterativeRobot {
 
 		SmartDashboard.putNumber("GyroAngle", driveTrain.getGyroAngle());
 
-		SmartDashboard.putNumber("Distance:  ", camera.getDistance());
-		SmartDashboard.putNumber("Angle:  ", camera.getAngle());
+		SmartDashboard.putNumber("Ultra Distance", Robot.rangeSensor.getDistance());
 
 	}
 
 	@Override
 	public void teleopInit() {
-		SmartDashboard.putNumber("retard", 24525);
-
-		if (a != null) {
-			a.threadLock = null;
-			a.stop();
-		}
 		isTeleop = true;
-		Utils.resetRobot();
-
-		isToggled = false;
+		isToggled = false;	
+		//camera.setExposure(50);
+		camera.setExposure(1);
+		Utils.resetRobot();	
 	}
 
+	//30 - open
+	//50 - closed
+	
 	boolean isToggled = false;
-
+	
 	/**
 	 * This function is called periodically during operator control
 	 */
@@ -211,6 +239,10 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
 
+		/*
+		 * Servos
+		 */
+		
 		driveTrain.teleop(gamepad);
 		speedShift.teleop(gamepad);
 		scalerShift.teleop(gamepad);
@@ -218,7 +250,8 @@ public class Robot extends IterativeRobot {
 		intake.teleop(gamepad);
 		shootaur.teleop(gamepad);
 
-		SmartDashboard.putNumber("Distance form egeg", rangeSensor.getDistance());
+		
+		SmartDashboard.putNumber("Distance form egeg", rangeSensor.getVoltage());
 		SmartDashboard.putNumber("Left Encoder Value", driveTrain.getLeftTalon().getEncPosition());
 		SmartDashboard.putNumber("Right Encoder Value", driveTrain.getRightTalon().getEncPosition());
 

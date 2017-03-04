@@ -7,33 +7,41 @@ import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Intake extends Subsystem implements Constants, Section {
-	
+
 	private final VictorSP intake;
-	
+
 	public enum Mode {
-		IN (-1),
-		OUT (+1),
-		STOP (0);
-		
+		IN(-1), OUT(+1), STOP(0);
+
 		private final int power;
-		
-		Mode(int p) {power = p;}
-		
-		public int power() {return power;}
+
+		Mode(int p) {
+			power = p;
+		}
+
+		public int power() {
+			return power;
+		}
 	}
 
 	public Intake() {
 		intake = new VictorSP(intakePort);
 		set(Mode.STOP);
 	}
-	
-	public void set(Mode mode) {intake.set(mode.power());}
-	
-	public void teleop(Joystick gamepad) {
-		if (gamepad.getRawButton(BTN_RB)) {set(Mode.IN);}
-		else {set(Mode.STOP);}
+
+	public void set(Mode mode) {
+		intake.set(mode.power());
 	}
-	
+
+	public void teleop(Joystick gamepad) {
+		if (gamepad.getRawAxis(2) > 0.9) {
+			set(Mode.IN);
+		} // LTrigger
+		else {
+			set(Mode.STOP);
+		}
+	}
+
 	@Override
 	protected void initDefaultCommand() {
 		System.out.println("Minotaur Intake");

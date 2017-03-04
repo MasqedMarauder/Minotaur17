@@ -29,12 +29,12 @@ public class AutoGearBlueLoader extends Auto {
 			Utils.sleep(1000);
 	
 			//driveTrain.moveByDistance(4*Math.PI, Direction.BACKWARD, 0.5);
-			Robot.driveTrain.moveInches(convert(60), Direction.BACKWARD, 128);
+			//Robot.driveTrain.moveInches(convert(60), Direction.BACKWARD, 128);
 			Utils.sleep(500);
 			Robot.driveTrain.turnP(48, Direction.COUNTERCLOCKWISE, .75, 10);
 			Utils.sleep(500);
 			Robot.driveTrain.resetEncoders();
-			Robot.driveTrain.moveInches(convert(45), Direction.BACKWARD, 20);
+			//Robot.driveTrain.moveInches(convert(45), Direction.BACKWARD, 20);
 			
 			//Robot.speedShift.set(Mode.SPEED);
 		}catch(Exception e){

@@ -9,8 +9,8 @@ public class MinoRangeSensor extends AnalogInput implements Constants {
 	}
 
 	public double getDistance() {
-		double inches = (getMillimetres() / 25.4) - 66.5;
-		return inches > 0 ? inches : 0;
+		double inches = (getMillimetres() / 25.4) - 6.5;
+		return inches > 0 ? inches : -1;
 	}
 
 	public double getMillimetres() {

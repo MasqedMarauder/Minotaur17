@@ -60,7 +60,7 @@ public class AutoTestCamera2 extends Auto {
 	
 	public void driveToTarget(){
 		try{
-		Robot.driveTrain.moveInches(convert(12), Direction.BACKWARD, (int)SmartDashboard.getNumber("Alllowable Error", 20));
+		//Robot.driveTrain.moveInches(convert(12), Direction.BACKWARD, (int)SmartDashboard.getNumber("Alllowable Error", 20));
 		}catch(Exception e){
 			
 		}

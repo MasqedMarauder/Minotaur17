@@ -42,7 +42,7 @@ public class AutoTestCamera extends Auto {
 					angle = Robot.camera.getAngle();
 
 				}
-				Robot.driveTrain.turnP(angle/4, (angle < 0 ? Direction.COUNTERCLOCKWISE : Direction.CLOCKWISE), .5, 2, 2000);
+				//Robot.driveTrain.turnP(angle/4, (angle < 0 ? Direction.COUNTERCLOCKWISE : Direction.CLOCKWISE), .5, 2, 2000);
 				Utils.sleep(100);
 				double dist = Robot.rangeSensor.getDistance();
 				System.out.println("dist: " + dist);
@@ -52,7 +52,7 @@ public class AutoTestCamera extends Auto {
 				
 			}
 			
-			Robot.driveTrain.turnP(360, Direction.CLOCKWISE, .2, 1, 100);
+			//Robot.driveTrain.turnP(360, Direction.CLOCKWISE, .2, 1, 100);
 			Robot.driveTrain.moveByGyroDistance(4, Direction.BACKWARD, 1000, 5, 1000);
 			
 			Robot.gearGrabber.set(GearGrabber.Mode.OPEN);

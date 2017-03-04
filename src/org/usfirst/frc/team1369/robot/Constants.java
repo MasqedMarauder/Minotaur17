@@ -19,6 +19,7 @@ public interface Constants {
 	int slaveRightMidPort	= 5;
 	int slaveRightPort		= 6;
 	
+	/*
 	int gearGrabberForChan	= 6;
 	int gearGrabberRevChan	= 7;
 	
@@ -27,10 +28,20 @@ public interface Constants {
 	
 	int speedShiftForChan	= 3;
 	int speedShiftRevChan	= 2;
+	*/
+	int gearGrabberForChan	= 4;
+	int gearGrabberRevChan	= 5;
 	
-	int shootaurIPort		= 0;
-	int intakePort			= 1;
-	int shootaurIIPort		= 2;
+	int scalerShiftForChan	= 3;
+	int scalerShiftRevChan	= 2;
+	
+	int speedShiftForChan	= 6;
+	int speedShiftRevChan	= 7;
+	
+	
+	int shootaurIPort		= 1;
+	int intakePort			= 2;
+	int shootaurIIPort		= 0;
 	
 	SPI.Port gyroPort = SPI.Port.kOnboardCS0;
 	
@@ -73,7 +84,7 @@ public interface Constants {
 	double kfDriveTrainVbus = .18514;
 	double kpDriveTrainVbus = 0.3;
 	double kiDriveTrainVbus = 0.0;
-	double kdDriveTrainVbus = 0.0;
+	double kdDriveTrainVbus = 1.5;
 	
 	
 	float NOMINAL_OUTPUT_VOLTAGE	= 0.0f;

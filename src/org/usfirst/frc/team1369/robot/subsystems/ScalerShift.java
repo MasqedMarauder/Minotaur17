@@ -46,7 +46,7 @@ public class ScalerShift extends MinoDoubleSol {
 	}
 
 	public void teleop(Joystick gamepad) {
-		if (gamepad.getRawButton(BTN_BACK)) {
+		if (gamepad.getRawButton(BTN_START)) {
 			if(shouldExecute) {
 				shouldExecute = false;
 				new Thread(new Runnable() {

@@ -19,13 +19,18 @@ public class Camera {
 	private double centerX = 888;
 	private final Object imgLock = new Object();
 	private double wBoundRect = 0.0;
+	
+	private UsbCamera cam;
+	
+	public Camera(){
+		cam = CameraServer.getInstance().startAutomaticCapture();
+		cam.setResolution(IMG_WIDTH, IMG_HEIGHT);
+		
+	}
 
 	public void start(){
 		
-		UsbCamera cam = CameraServer.getInstance().startAutomaticCapture();
-		cam.setResolution(IMG_WIDTH, IMG_HEIGHT);
-		cam.setExposureManual(1);
-		
+		setExposure(1);
 		visionThread = new VisionThread(cam, new GRIP(), gRIP -> {
 			SmartDashboard.putString("Pipeline", "Starting it now");
 			try {
@@ -86,10 +91,18 @@ public class Camera {
 			wBoundRect = this.wBoundRect;
 		}
 		
-		double dPixels = getDistance() * wBoundRect / Constants.VISION_TARG_WIDTH;
+		//double dPixels = getDistance() * wBoundRect / Constants.VISION_TARG_WIDTH;
+		double dPixels = Robot.rangeSensor.getDistance() * wBoundRect / Constants.VISION_TARG_WIDTH;
 		SmartDashboard.putNumber("CenterX", centerX);
 		SmartDashboard.putNumber("wBoundRect", wBoundRect);
 		return Math.toDegrees(Math.atan((centerX - (IMG_WIDTH / 2))/dPixels));
+	}
+	
+	
+	public void setExposure(int exp)
+	{
+
+		cam.setExposureManual(exp);
 	}
 	
 }
