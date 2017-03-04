@@ -212,114 +212,6 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 			value = max;
 		return value;
 	}
-
-	/*public void moveByDistance(double inches, Direction direction, double speed) {
-		resetEncoders();
-
-		int targetClicks = (int) (inches * CLICKS_PER_INCH);
-		int clicksRemaining;
-		double inchesRemaining;
-		double power;
-		double p_gain = 0.3;
-
-		do {
-			clicksRemaining = targetClicks - Math.abs(rightTalon.getEncPosition());
-			inchesRemaining = clicksRemaining / CLICKS_PER_INCH;
-			power = direction.value * speed * inchesRemaining * p_gain;
-			setTarget(power);
-			if (Robot.isTeleop)
-				break;
-		} while (inchesRemaining > 0.5);
-		stopDrive();
-	}*/
-
-	/*public double inchesToApporvas(double inches) {
-		return inches / (4 * Math.PI);
-	}*/
-
-	/*public boolean memeMove(double inches, int speed, int allowableError) throws AutoInterruptedException {
-		inches = inches * 256 / (4 * Math.PI);
-
-		SmartDashboard.putNumber("Laft Target", inches);
-		
-		resetEncoders();
-		Utils.sleep(1000);
-		
-		setControlMode(TalonControlMode.PercentVbus);
-		
-		double error = 0;
-		double previousError = 0;
-		
-		while(Math.abs(leftTalon.getEncPosition()) < inches) {
-			error = inches - leftTalon.getEncPosition();
-			
-			SmartDashboard.putNumber("Laft Error", error);
-			
-			leftTalon.set(-error * 0.03);
-			rightTalon.set(error * 0.03);
-			
-			previousError = error;
-			
-			if(Robot.isDisabled) {
-				throw new AutoInterruptedException();
-			}
-		}
-		
-		this.stopDrive();
-		
-		double kP = 0.3;
-		
-		
-		
-		return true;
-	}*/
-	
-	/*public boolean moveInches(double inches, Direction direction, int allowableError) throws AutoInterruptedException{
-		//resetEncoders();
-		setControlMode(TalonControlMode.Position);
-	/*	leftTalon.setProfile(1);
-		rightTalon.setProfile(1);
-		Utils.sleep(100);
-		
-		//0.25 - Varun's P
-		
-		/*
-		leftTalon.setP(SmartDashboard.getNumber("Left PID Constant P", kpDriveTrainVbus));
-		leftTalon.setI(SmartDashboard.getNumber("Left PID Constant I", kiDriveTrainVbus));
-		leftTalon.setD(SmartDashboard.getNumber("Left PID Constant D", kdDriveTrainVbus));
-		leftTalon.setF(SmartDashboard.getNumber("Left PID Constant F", kfDriveTrainVbus));
-
-		rightTalon.setP(SmartDashboard.getNumber("Right PID Constant P", kpDriveTrainVbus));
-		rightTalon.setI(SmartDashboard.getNumber("Right PID Constant I", kiDriveTrainVbus));
-		rightTalon.setD(SmartDashboard.getNumber("Right PID Constant D", kdDriveTrainVbus));
-		rightTalon.setF(SmartDashboard.getNumber("Right PID Constant F", kfDriveTrainVbus));
-		*/
-
-	/*	setTarget(inchesToApporvas(inches) * direction.value);
-		int count = 0;
-		do {
-			setTarget(inchesToApporvas(inches) * direction.value);
-			
-			if(Robot.isDisabled){
-				throw new AutoInterruptedException();
-			}
-		} while (Math.abs(leftTalon.getError()) > allowableError || Math.abs((rightTalon.getError())) > allowableError) ;
-		
-		System.out.println("Broke out of the loop");
-		
-		leftTalon.setProfile(0);
-		rightTalon.setProfile(0);
-		stopPositionDrive();
-		return true;
-	}*/
-
-	/*private void stopPositionDrive() {
-		SmartDashboard.putString("Stopped", "dude");
-		stopDrive();
-		leftTalon.setProfile(0);
-		leftTalon.setProfile(0);
-
-	}*/
 	
 	public void turnP(double degrees, Direction direction, double speed, double allowableError) throws AutoInterruptedException{
 		resetGyro();
@@ -360,46 +252,6 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 		System.out.println("Completed");
 		stopDrive();
 	}
-
-	/*public void turnP(double degrees, Direction direction, double speed, double allowableError, double killTime) throws AutoInterruptedException{
-		resetGyro();
-		setControlMode(TalonControlMode.PercentVbus);
-		double error;
-		double power;
-		double kp = 0.05;
-		double integral = 0;
-		double ki = 0.00003;
-		double prevTime = System.currentTimeMillis();
-
-		double sTime = System.currentTimeMillis();
-		
-		int count = 0;
-		System.out.println("turning");
-		do {
-			
-			if(Robot.isTeleop || Robot.isDisabled){
-				throw new AutoInterruptedException();
-			}
-			
-			else{
-				error = direction.value * (Math.abs(degrees) > 60 ? 0 : Math.abs(degrees)) - gyro.getAngle();
-				integral += error * (System.currentTimeMillis() - prevTime);
-				prevTime = System.currentTimeMillis();
-				power = kp * error + ki * integral;
-  				power = clip(power, -speed, +speed);
-				setTarget(power, power);
-				
-				if(Math.abs(error) < allowableError){
-					count++;
-				}
-				else{
-					count = 0;
-				}
-			}
-		} while (count < 500 && System.currentTimeMillis() - sTime < killTime);
-		System.out.println("Completed");
-		stopDrive();
-	}*/
 
 	public static boolean robotStop = false;
 	
@@ -568,8 +420,6 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 			driveMode = TeleopDriveModes.NEED_4_SPEED;
 
 		if (!Robot.scalerShift.isScaleMode()) {
-			// this.leftTalon.set(left_y * 500);
-			// this.rightTalon.set(right_y * 500);
 			double leftPower = left_y - right_x;
 			double rightPower = left_y + right_x;
 
@@ -582,21 +432,6 @@ public class DriveTrain extends Subsystem implements Constants, Section {
 				rightPower /= Math.abs(rightPower);
 			}
 			driveVelocity(1250 * leftPower, 1250 * rightPower);
-			/*
-			 * switch(driveMode) { case TANK_DRIVE: //driveVbus(left_y * 0.8,
-			 * right_y * 0.8); driveVelocity(-1250 * left_y, 1250 * right_y);
-			 * break; case NEED_4_SPEED: double leftPower = left_y - right_x;
-			 * double rightPower = left_y + right_x;
-			 * 
-			 * if (Math.abs(leftPower) > 1) { leftPower /= Math.abs(leftPower);
-			 * rightPower /= Math.abs(leftPower); } if (Math.abs(rightPower) >
-			 * 1) { leftPower /= Math.abs(rightPower); rightPower /=
-			 * Math.abs(rightPower); }
-			 * 
-			 * 
-			 * 
-			 * driveVelocity(1250 * leftPower, 1250 * rightPower); break; }
-			 */
 		} else {
 			left_y = Math.abs(left_y);
 			driveVbus(-left_y, left_y);
